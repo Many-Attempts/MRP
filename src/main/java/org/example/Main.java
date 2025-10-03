@@ -1,17 +1,42 @@
 package org.example;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import com.sun.net.httpserver.HttpServer;
+import org.example.utils.Router;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+        try {
+            // Create HTTP server on port 8080
+            HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+            // Set up router for all API endpoints
+            server.createContext("/", new Router());
+
+            // Start the server
+            server.setExecutor(null); // creates a default executor spawns a new thread for each request
+            server.start();
+
+            System.out.println("===========================================");
+            System.out.println("Media Ratings Platform (MRP) Server");
+            System.out.println("===========================================");
+            System.out.println("Server started on http://localhost:8080");
+            System.out.println("API endpoints available at http://localhost:8080/api");
+            System.out.println("");
+            System.out.println("Available endpoints:");
+            System.out.println("  POST   /api/auth/register     - Register new user");
+            System.out.println("  POST   /api/auth/login        - Login user");
+            System.out.println("");
+            System.out.println("Database: PostgreSQL on localhost:5433");
+            System.out.println("Press Ctrl+C to stop the server");
+            System.out.println("===========================================");
+
+        } catch (IOException e) {
+            System.err.println("Failed to start server: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
         }
     }
 }
