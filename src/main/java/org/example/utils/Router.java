@@ -23,8 +23,7 @@ public class Router implements HttpHandler {
                 JsonHelper.sendResponse(exchange, 200,
                     java.util.Map.of(
                         "status", "ok",
-                        "service", "Media Ratings Platform",
-                        "version", "1.0.0"
+                        "service", "Media Ratings Platform"
                     )
                 );
             }

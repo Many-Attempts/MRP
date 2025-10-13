@@ -159,14 +159,14 @@ public class Database {
 
     // Helper method to get UUID from ResultSet by column name
     // Safely converts string representation back to UUID object, handling nulls
-    public static UUID getUUID(ResultSet rs, String columnName) throws SQLException {
+    public UUID getUUID(ResultSet rs, String columnName) throws SQLException {
         String uuidString = rs.getString(columnName);
         return uuidString != null ? UUID.fromString(uuidString) : null;
     }
 
     // Helper method to get UUID from ResultSet by column index (1-based)
     // Alternative to column name when you know the position but not the name
-    public static UUID getUUID(ResultSet rs, int columnIndex) throws SQLException {
+    public UUID getUUID(ResultSet rs, int columnIndex) throws SQLException {
         String uuidString = rs.getString(columnIndex);
         return uuidString != null ? UUID.fromString(uuidString) : null;
     }

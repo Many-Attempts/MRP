@@ -106,7 +106,7 @@ public class AuthHandler implements HttpHandler {
             return;
         }
 
-        UUID userId = Database.getUUID(rs, "id");
+        UUID userId = db.getUUID(rs, "id");
         String passwordHash = rs.getString("password_hash");
 
         // Verify password
@@ -135,8 +135,8 @@ public class AuthHandler implements HttpHandler {
         JsonHelper.sendResponse(exchange, 200, response);
     }
 
-    // Static method to validate token
-    public static UUID validateToken(HttpExchange exchange) throws SQLException {
+    // Method to validate token
+    public UUID validateToken(HttpExchange exchange) throws SQLException {
         String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -145,28 +145,26 @@ public class AuthHandler implements HttpHandler {
 
         String token = authHeader.substring(7); // Remove "Bearer "
 
-        Database db = Database.getInstance();
         ResultSet rs = db.query(
             "SELECT user_id FROM auth_tokens WHERE token = ?",
             token
         );
 
         if (rs.next()) {
-            return Database.getUUID(rs, "user_id");
+            return db.getUUID(rs, "user_id");
         }
 
         return null;
     }
 
     // Helper method to get user from token
-    public static User getUserFromToken(String token) throws SQLException {
+    public User getUserFromToken(String token) throws SQLException {
         if (token == null || !token.startsWith("Bearer ")) {
             return null;
         }
 
         token = token.substring(7); // Remove "Bearer "
 
-        Database db = Database.getInstance();
         ResultSet rs = db.query(
             "SELECT u.* FROM users u " +
             "JOIN auth_tokens t ON t.user_id = u.id " +
@@ -176,7 +174,7 @@ public class AuthHandler implements HttpHandler {
 
         if (rs.next()) {
             User user = new User();
-            user.setId(Database.getUUID(rs, "id"));
+            user.setId(db.getUUID(rs, "id"));
             user.setUsername(rs.getString("username"));
             user.setPasswordHash(rs.getString("password_hash"));
             user.setCreatedAt(rs.getTimestamp("created_at"));
