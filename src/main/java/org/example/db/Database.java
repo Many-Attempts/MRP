@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.UUID;
 
 public class Database {
-    private static final String URL = "jdbc:postgresql://localhost:5433/mrp_db";
-    private static final String USER = "postgres";
-    private static final String PASSWORD = "postgres";
+    protected static final String URL = "jdbc:postgresql://localhost:5433/mrp_db";
+    protected static final String USER = "postgres";
+    protected static final String PASSWORD = "postgres";
 
-    private static Database instance;
-    private Connection connection;
+    protected static Database instance;
+    protected Connection connection;
 
-    private Database() {
+    protected Database() {
         connect();
     }
 

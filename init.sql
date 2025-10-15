@@ -61,17 +61,10 @@ CREATE TABLE favorites (
 -- Auth tokens table
 CREATE TABLE auth_tokens (
     token VARCHAR(100) PRIMARY KEY,
-    user_id VARCHAR(36) REFERENCES users(id),
+    user_id VARCHAR(36) REFERENCES users(id) UNIQUE,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Create indexes for better performance
-CREATE INDEX idx_media_entries_creator ON media_entries(creator_id);
-CREATE INDEX idx_media_entries_type ON media_entries(media_type);
-CREATE INDEX idx_media_entries_year ON media_entries(release_year);
-CREATE INDEX idx_ratings_media ON ratings(media_id);
-CREATE INDEX idx_ratings_user ON ratings(user_id);
-CREATE INDEX idx_auth_tokens_user ON auth_tokens(user_id);
 
 -- Insert some test data with pre-generated UUIDs
 -- User IDs

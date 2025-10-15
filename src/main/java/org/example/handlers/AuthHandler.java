@@ -1,6 +1,7 @@
 package org.example.handlers;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.example.db.Database;
@@ -38,7 +39,15 @@ public class AuthHandler implements HttpHandler {
     }
 
     private void handleRegister(HttpExchange exchange) throws IOException, SQLException {
-        Map<String, String> request = JsonHelper.parseRequest(exchange, HashMap.class);
+        // Parse JSON request body
+        Map<String, String> request;
+        try {
+            request = JsonHelper.parseRequest(exchange, HashMap.class);
+        } catch (JsonParseException e) {
+            JsonHelper.sendError(exchange, 400, "Invalid JSON format");
+            return;
+        }
+
         String username = request.get("username");
         String password = request.get("password");
 
@@ -84,7 +93,15 @@ public class AuthHandler implements HttpHandler {
     }
 
     private void handleLogin(HttpExchange exchange) throws IOException, SQLException {
-        Map<String, String> request = JsonHelper.parseRequest(exchange, HashMap.class);
+        // Parse JSON request body
+        Map<String, String> request;
+        try {
+            request = JsonHelper.parseRequest(exchange, HashMap.class);
+        } catch (JsonParseException e) {
+            JsonHelper.sendError(exchange, 400, "Invalid JSON format");
+            return;
+        }
+
         String username = request.get("username");
         String password = request.get("password");
 
@@ -121,8 +138,8 @@ public class AuthHandler implements HttpHandler {
 
         // Store token
         db.update(
-            "INSERT INTO auth_tokens (token, user_id) VALUES (?, ?)",
-            token, userId
+            "INSERT INTO auth_tokens (token, user_id) VALUES (?, ?) ON CONFLICT (user_id) DO UPDATE SET token = (?)",
+            token, userId, token
         );
 
         // Create response
