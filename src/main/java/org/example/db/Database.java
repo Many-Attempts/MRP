@@ -65,7 +65,7 @@ public class Database {
 
         // Create a new params array with UUID as the first parameter
         Object[] newParams = new Object[params.length + 1];
-        newParams[0] = uuid.toString();  // Store as string in DB
+        newParams[0] = uuid;  // Store as UUID object
         System.arraycopy(params, 0, newParams, 1, params.length);
 
         PreparedStatement stmt = prepareStatement(sql, newParams);
@@ -125,15 +125,10 @@ public class Database {
     }
 
     // Safely binds parameter values to the PreparedStatement placeholders (?)
-    // Handles special cases like UUID conversion to ensure proper database storage
+    // Handles all parameter types including native UUID objects
     private void setParameters(PreparedStatement stmt, Object... params) throws SQLException {
         for (int i = 0; i < params.length; i++) {
-            // Convert UUID to string for database storage
-            if (params[i] instanceof UUID) {
-                stmt.setString(i + 1, params[i].toString());
-            } else {
-                stmt.setObject(i + 1, params[i]);
-            }
+            stmt.setObject(i + 1, params[i]);
         }
     }
 
@@ -158,17 +153,15 @@ public class Database {
     }
 
     // Helper method to get UUID from ResultSet by column name
-    // Safely converts string representation back to UUID object, handling nulls
+    // Retrieves native UUID object from database, handling nulls
     public UUID getUUID(ResultSet rs, String columnName) throws SQLException {
-        String uuidString = rs.getString(columnName);
-        return uuidString != null ? UUID.fromString(uuidString) : null;
+        return rs.getObject(columnName, UUID.class);
     }
 
     // Helper method to get UUID from ResultSet by column index (1-based)
-    // Alternative to column name when you know the position but not the name
+    // Retrieves native UUID object from database, handling nulls
     public UUID getUUID(ResultSet rs, int columnIndex) throws SQLException {
-        String uuidString = rs.getString(columnIndex);
-        return uuidString != null ? UUID.fromString(uuidString) : null;
+        return rs.getObject(columnIndex, UUID.class);
     }
 
     // Closes the database connection cleanly

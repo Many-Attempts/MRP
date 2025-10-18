@@ -134,11 +134,11 @@ public class AuthHandler implements HttpHandler {
         }
 
         // Generate token
-        String token = username + "-" + UUIDGenerator.generateUUIDv7().toString();
+        String token = UUIDGenerator.generateUUIDv7().toString();
 
         // Store token
         db.update(
-            "INSERT INTO auth_tokens (token, user_id) VALUES (?, ?) ON CONFLICT (user_id) DO UPDATE SET token = (?)",
+            "INSERT INTO auth_tokens (token, user_id) VALUES (?, ?) ON CONFLICT (user_id) DO UPDATE SET token = ?",
             token, userId, token
         );
 

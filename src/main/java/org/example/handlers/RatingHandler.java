@@ -90,4 +90,14 @@ public class RatingHandler implements HttpHandler {
     private void handleUnlikeRating(HttpExchange exchange, String ratingId, UUID userId) throws IOException {
         JsonHelper.sendSuccess(exchange, "Will be implemented");
     }
+
+    // Helper method to validate and parse UUID from string
+    private UUID parseUUID(HttpExchange exchange, String uuidString) throws IOException {
+        try {
+            return UUID.fromString(uuidString);
+        } catch (IllegalArgumentException e) {
+            JsonHelper.sendError(exchange, 400, "Invalid UUID format");
+            return null;
+        }
+    }
 }

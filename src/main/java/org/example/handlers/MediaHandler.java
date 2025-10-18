@@ -112,8 +112,13 @@ public class MediaHandler implements HttpHandler {
         }
 
         if (params.containsKey("year")) {
-            sql.append("AND m.release_year = ? ");
-            queryParams.add(Integer.parseInt(params.get("year")));
+            try {
+                sql.append("AND m.release_year = ? ");
+                queryParams.add(Integer.parseInt(params.get("year")));
+            } catch (NumberFormatException e) {
+                JsonHelper.sendError(exchange, 400, "Invalid year parameter");
+                return;
+            }
         }
 
         if (params.containsKey("age")) {
@@ -148,6 +153,9 @@ public class MediaHandler implements HttpHandler {
     }
 
     private void handleGetMedia(HttpExchange exchange, String mediaId, UUID userId) throws IOException, SQLException {
+        UUID mediaUUID = parseUUID(exchange, mediaId);
+        if (mediaUUID == null) return; // Error already sent
+
         ResultSet rs = db.query(
             "SELECT m.*, u.username as creator_username, " +
             "COALESCE(AVG(r.stars), 0) as avg_rating, " +
@@ -157,7 +165,7 @@ public class MediaHandler implements HttpHandler {
             "LEFT JOIN ratings r ON m.id = r.media_id " +
             "WHERE m.id = ? " +
             "GROUP BY m.id, u.username",
-            mediaId
+            mediaUUID
         );
 
         if (!rs.next()) {
@@ -176,7 +184,7 @@ public class MediaHandler implements HttpHandler {
             "JOIN users u ON r.user_id = u.id " +
             "WHERE r.media_id = ? AND (r.is_confirmed = true OR r.user_id = ?) " +
             "ORDER BY r.created_at DESC",
-            userId, mediaId, userId
+            userId, mediaUUID, userId
         );
 
         List<Rating> ratings = new ArrayList<>();
@@ -236,15 +244,18 @@ public class MediaHandler implements HttpHandler {
     }
 
     private void handleUpdateMedia(HttpExchange exchange, String mediaId, UUID userId) throws IOException, SQLException {
+        UUID mediaUUID = parseUUID(exchange, mediaId);
+        if (mediaUUID == null) return; // Error already sent
+
         // Check if user is the creator
-        Object creatorIdObj = db.getValue("SELECT creator_id FROM media_entries WHERE id = ?", mediaId);
+        Object creatorIdObj = db.getValue("SELECT creator_id FROM media_entries WHERE id = ?", mediaUUID);
 
         if (creatorIdObj == null) {
             JsonHelper.sendError(exchange, 404, "Media not found");
             return;
         }
 
-        UUID creatorId = UUID.fromString((String) creatorIdObj);
+        UUID creatorId = (UUID) creatorIdObj;
         if (!creatorId.equals(userId)) {
             JsonHelper.sendError(exchange, 403, "Only the creator can edit this media");
             return;
@@ -276,11 +287,11 @@ public class MediaHandler implements HttpHandler {
             media.getReleaseYear(),
             media.getGenres(),
             media.getAgeRestriction(),
-            mediaId
+            mediaUUID
         );
 
         if (updated > 0) {
-            media.setId(UUID.fromString(mediaId));
+            media.setId(mediaUUID);
             JsonHelper.sendResponse(exchange, 200, media);
         } else {
             JsonHelper.sendError(exchange, 500, "Failed to update media");
@@ -288,22 +299,25 @@ public class MediaHandler implements HttpHandler {
     }
 
     private void handleDeleteMedia(HttpExchange exchange, String mediaId, UUID userId) throws IOException, SQLException {
+        UUID mediaUUID = parseUUID(exchange, mediaId);
+        if (mediaUUID == null) return; // Error already sent
+
         // Check if user is the creator
-        Object creatorIdObj = db.getValue("SELECT creator_id FROM media_entries WHERE id = ?", mediaId);
+        Object creatorIdObj = db.getValue("SELECT creator_id FROM media_entries WHERE id = ?", mediaUUID);
 
         if (creatorIdObj == null) {
             JsonHelper.sendError(exchange, 404, "Media not found");
             return;
         }
 
-        UUID creatorId = UUID.fromString((String) creatorIdObj);
+        UUID creatorId = (UUID) creatorIdObj;
         if (!creatorId.equals(userId)) {
             JsonHelper.sendError(exchange, 403, "Only the creator can delete this media");
             return;
         }
 
         // Delete media (cascades to ratings, favorites, etc.)
-        int deleted = db.update("DELETE FROM media_entries WHERE id = ?", mediaId);
+        int deleted = db.update("DELETE FROM media_entries WHERE id = ?", mediaUUID);
 
         if (deleted > 0) {
             JsonHelper.sendSuccess(exchange, "Media deleted successfully");
@@ -313,25 +327,31 @@ public class MediaHandler implements HttpHandler {
     }
 
     private void handleAddFavorite(HttpExchange exchange, String mediaId, UUID userId) throws IOException, SQLException {
+        UUID mediaUUID = parseUUID(exchange, mediaId);
+        if (mediaUUID == null) return; // Error already sent
+
         // Check if media exists
-        if (!db.exists("SELECT 1 FROM media_entries WHERE id = ?", mediaId)) {
+        if (!db.exists("SELECT 1 FROM media_entries WHERE id = ?", mediaUUID)) {
             JsonHelper.sendError(exchange, 404, "Media not found");
             return;
         }
 
         // Check if already favorited
-        if (db.exists("SELECT 1 FROM favorites WHERE user_id = ? AND media_id = ?", userId, mediaId)) {
+        if (db.exists("SELECT 1 FROM favorites WHERE user_id = ? AND media_id = ?", userId, mediaUUID)) {
             JsonHelper.sendError(exchange, 400, "Already in favorites");
             return;
         }
 
         // Add to favorites
-        db.update("INSERT INTO favorites (user_id, media_id) VALUES (?, ?)", userId, mediaId);
+        db.update("INSERT INTO favorites (user_id, media_id) VALUES (?, ?)", userId, mediaUUID);
         JsonHelper.sendSuccess(exchange, "Added to favorites");
     }
 
     private void handleRemoveFavorite(HttpExchange exchange, String mediaId, UUID userId) throws IOException, SQLException {
-        int deleted = db.update("DELETE FROM favorites WHERE user_id = ? AND media_id = ?", userId, mediaId);
+        UUID mediaUUID = parseUUID(exchange, mediaId);
+        if (mediaUUID == null) return; // Error already sent
+
+        int deleted = db.update("DELETE FROM favorites WHERE user_id = ? AND media_id = ?", userId, mediaUUID);
 
         if (deleted > 0) {
             JsonHelper.sendSuccess(exchange, "Removed from favorites");
@@ -355,5 +375,15 @@ public class MediaHandler implements HttpHandler {
         media.setAverageRating(rs.getDouble("avg_rating"));
         media.setTotalRatings(rs.getInt("total_ratings"));
         return media;
+    }
+
+    // Helper method to validate and parse UUID from string
+    private UUID parseUUID(HttpExchange exchange, String uuidString) throws IOException {
+        try {
+            return UUID.fromString(uuidString);
+        } catch (IllegalArgumentException e) {
+            JsonHelper.sendError(exchange, 400, "Invalid UUID format");
+            return null;
+        }
     }
 }

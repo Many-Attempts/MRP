@@ -547,6 +547,11 @@
 									"    pm.expect(jsonData.token.length).to.be.above(0);",
 									"});",
 									"",
+									"pm.test(\"Token is valid UUID format\", function () {",
+									"    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;",
+									"    pm.expect(jsonData.token).to.match(uuidRegex);",
+									"});",
+									"",
 									"pm.test(\"Username matches request\", function () {",
 									"    const requestBody = JSON.parse(pm.request.body.raw);",
 									"    pm.expect(jsonData.username).to.equal(requestBody.username);",
@@ -583,7 +588,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"newuser\",\n    \"password\": \"password123\"\n}"
+							"raw": "{\n    \"username\": \"testuser1\",\n    \"password\": \"test123\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/login",

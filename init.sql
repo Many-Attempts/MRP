@@ -11,7 +11,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Users table
 CREATE TABLE users (
-    id VARCHAR(36) PRIMARY KEY,
+    id UUID PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
@@ -19,22 +19,22 @@ CREATE TABLE users (
 
 -- Media entries table
 CREATE TABLE media_entries (
-    id VARCHAR(36) PRIMARY KEY,
+    id UUID PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     media_type VARCHAR(20) NOT NULL CHECK (media_type IN ('movie', 'series', 'game')),
     release_year INT,
     genres VARCHAR(255), -- comma-separated list
     age_restriction VARCHAR(10),
-    creator_id VARCHAR(36) REFERENCES users(id),
+    creator_id UUID REFERENCES users(id),
     created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- Ratings table
 CREATE TABLE ratings (
-    id VARCHAR(36) PRIMARY KEY,
-    media_id VARCHAR(36) REFERENCES media_entries(id) ON DELETE CASCADE,
-    user_id VARCHAR(36) REFERENCES users(id),
+    id UUID PRIMARY KEY,
+    media_id UUID REFERENCES media_entries(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id),
     stars INT NOT NULL CHECK (stars >= 1 AND stars <= 5),
     comment TEXT,
     is_confirmed BOOLEAN DEFAULT FALSE,
@@ -44,16 +44,16 @@ CREATE TABLE ratings (
 
 -- Rating likes table
 CREATE TABLE rating_likes (
-    rating_id VARCHAR(36) REFERENCES ratings(id) ON DELETE CASCADE,
-    user_id VARCHAR(36) REFERENCES users(id),
+    rating_id UUID REFERENCES ratings(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id),
     created_at TIMESTAMP DEFAULT NOW(),
     PRIMARY KEY(rating_id, user_id)
 );
 
 -- Favorites table
 CREATE TABLE favorites (
-    user_id VARCHAR(36) REFERENCES users(id),
-    media_id VARCHAR(36) REFERENCES media_entries(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id),
+    media_id UUID REFERENCES media_entries(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT NOW(),
     PRIMARY KEY(user_id, media_id)
 );
@@ -61,7 +61,7 @@ CREATE TABLE favorites (
 -- Auth tokens table
 CREATE TABLE auth_tokens (
     token VARCHAR(100) PRIMARY KEY,
-    user_id VARCHAR(36) REFERENCES users(id) UNIQUE,
+    user_id UUID REFERENCES users(id) UNIQUE,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -73,9 +73,9 @@ CREATE TABLE auth_tokens (
 -- admin: 01900000-0000-7000-8000-000000000003
 
 INSERT INTO users (id, username, password_hash) VALUES
-    ('01900000-0000-7000-8000-000000000001', 'testuser1', '$2a$12$KIXxPfAQKPbPbpPPpPpPpeZZ0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0'), -- password: test123
-    ('01900000-0000-7000-8000-000000000002', 'testuser2', '$2a$12$KIXxPfAQKPbPbpPPpPpPpeZZ0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0'), -- password: test123
-    ('01900000-0000-7000-8000-000000000003', 'admin', '$2a$12$KIXxPfAQKPbPbpPPpPpPpeZZ0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0'); -- password: test123
+    ('01900000-0000-7000-8000-000000000001', 'testuser1', '$2b$12$k0UZiJ7/cBPR/692NlCAtu9a8m7wBnlNm.bBTKKUdBiWYuluyPW/y'), -- password: test123
+    ('01900000-0000-7000-8000-000000000002', 'testuser2', '$2b$12$2SFE0KkNlfKpcjmVjQ6ZTOiSnsbfmG8hOdMQDBDooOyAYSrpSWVq6'), -- password: test123
+    ('01900000-0000-7000-8000-000000000003', 'admin', '$2b$12$OhFN8E0JfaepvsPL2ONwWOJgRsBj2X4Ze99G8C.I4xXFppgftGzZW'); -- password: test123
 
 -- Media IDs
 -- The Matrix: 01900000-0000-7000-8000-000000000101
