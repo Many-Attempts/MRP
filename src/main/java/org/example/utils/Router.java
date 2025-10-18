@@ -8,6 +8,9 @@ import java.io.IOException;
 
 public class Router implements HttpHandler {
     private final AuthHandler authHandler = new AuthHandler();
+    private final MediaHandler mediaHandler = new MediaHandler();
+    private final RatingHandler ratingHandler = new RatingHandler();
+    private final UserHandler userHandler = new UserHandler();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -18,13 +21,21 @@ public class Router implements HttpHandler {
             if (path.startsWith("/api/auth/") || path.startsWith("/api/users/login")) {
                 authHandler.handle(exchange);
             }
+            else if (path.startsWith("/api/media")) {
+                // Could be /api/media or /api/media/{id}/ratings
+                if (path.contains("/ratings")) {
+                    ratingHandler.handle(exchange);
+                } else {
+                    mediaHandler.handle(exchange);
+                }
+            }
             else if (path.equals("/") || path.equals("/api") || path.equals("/api/")) {
                 // Health check endpoint
                 JsonHelper.sendResponse(exchange, 200,
-                    java.util.Map.of(
-                        "status", "ok",
-                        "service", "Media Ratings Platform"
-                    )
+                        java.util.Map.of(
+                                "status", "ok",
+                                "service", "Media Ratings Platform"
+                        )
                 );
             }
             else {
