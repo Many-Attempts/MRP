@@ -1,1 +1,1 @@
-https://github.com/Many-Attempts/MRP.git
+ttps://github.com/Many-Attempts/MRP.git

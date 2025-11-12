@@ -12,6 +12,11 @@ public class User {
     private String passwordHash;
     private Timestamp createdAt;
 
+    // Statistics fields
+    private int totalRatings;
+    private int totalFavorites;
+    private int totalMediaCreated;
+
     public User() {}
 
     public User(UUID id, String username, String passwordHash, Timestamp createdAt) {
@@ -22,12 +27,20 @@ public class User {
     }
 
     // Getters
+    public UUID getId() { return id; }
+    public String getUsername() { return username; }
+    public String getPasswordHash() { return passwordHash; }
+    public Timestamp getCreatedAt() { return createdAt; }
+    public int getTotalRatings() { return totalRatings; }
+    public int getTotalFavorites() { return totalFavorites; }
+    public int getTotalMediaCreated() { return totalMediaCreated; }
+
+    // Setters
     public void setId(UUID id) { this.id = id; }
-
     public void setUsername(String username) { this.username = username; }
-
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
-
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
-
+    public void setTotalRatings(int totalRatings) { this.totalRatings = totalRatings; }
+    public void setTotalFavorites(int totalFavorites) { this.totalFavorites = totalFavorites; }
+    public void setTotalMediaCreated(int totalMediaCreated) { this.totalMediaCreated = totalMediaCreated; }
 }

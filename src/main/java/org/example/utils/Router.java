@@ -29,6 +29,20 @@ public class Router implements HttpHandler {
                     mediaHandler.handle(exchange);
                 }
             }
+            else if (path.startsWith("/api/ratings")) {
+                // /api/ratings/{id}, /api/ratings/{id}/confirm, /api/ratings/{id}/like, etc.
+                ratingHandler.handle(exchange);
+            }
+            else if (path.startsWith("/api/users/")) {
+                // /api/users/{username}/profile, /api/users/{username}/favorites, /api/users/{username}/ratings
+                userHandler.handle(exchange);
+            }
+            else if (path.equals("/api/leaderboard")) {
+                userHandler.handle(exchange);
+            }
+            else if (path.equals("/api/recommendations")) {
+                userHandler.handle(exchange);
+            }
             else if (path.equals("/") || path.equals("/api") || path.equals("/api/")) {
                 // Health check endpoint
                 JsonHelper.sendResponse(exchange, 200,

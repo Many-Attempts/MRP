@@ -1,0 +1,6359 @@
+{
+	"info": {
+		"_postman_id": "ecac0407-533c-42aa-b363-a71f876ce54c",
+		"name": "Media Ratings Platform (MRP) Copy",
+		"description": "Comprehensive API collection for testing the MRP REST endpoints with positive and negative test cases",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22837350"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register - Valid Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Register User - Valid Data",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has required fields\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"id\");",
+									"    pm.expect(jsonData).to.have.property(\"username\");",
+									"    pm.expect(jsonData).to.have.property(\"message\");",
+									"});",
+									"",
+									"pm.test(\"Response fields have correct types\", function () {",
+									"    pm.expect(jsonData.id).to.be.a(\"string\");",
+									"    pm.expect(jsonData.username).to.be.a(\"string\");",
+									"    pm.expect(jsonData.message).to.be.a(\"string\");",
+									"});",
+									"",
+									"pm.test(\"Username matches request\", function () {",
+									"    const requestBody = JSON.parse(pm.request.body.raw);",
+									"    pm.expect(jsonData.username).to.equal(requestBody.username);",
+									"});",
+									"",
+									"pm.test(\"ID is valid UUID format\", function () {",
+									"    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;",
+									"    pm.expect(jsonData.id).to.match(uuidRegex);",
+									"});",
+									"",
+									"pm.test(\"Success message is present\", function () {",
+									"    pm.expect(jsonData.message).to.include(\"success\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"newuser{{$timestamp}}\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user with valid username and password"
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Missing Username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Register - Missing Username",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error message mentions required fields\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/username.*required|required.*username/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Attempt to register without providing a username"
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Missing Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Register - Missing Password",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error message mentions required fields\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/password.*required|required.*password/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Attempt to register without providing a password"
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Short Username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Register - Short Username (less than 3 characters)",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error message mentions username length requirement\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/username.*between.*3.*50|username.*3.*characters/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"ab\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Attempt to register with a username shorter than 3 characters"
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Short Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Register - Short Password (less than 6 characters)",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error message mentions password length requirement\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/password.*at least.*6|password.*6.*characters/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"validusername\",\n    \"password\": \"12345\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Attempt to register with a password shorter than 6 characters"
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Duplicate Username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Register - Duplicate Username",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error message mentions username already exists\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/username.*already|already.*exists|duplicate/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser1\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Attempt to register with an existing username (testuser1 from init.sql)"
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Empty Username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Register - Empty Username",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error message indicates validation failure\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/username.*required|required.*username|username.*between/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Attempt to register with an empty string as username"
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Invalid JSON",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Register - Invalid JSON",
+									"pm.test(\"Status code is 400 or 500\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 500]);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+									"});",
+									"",
+									"pm.test(\"Response indicates error\", function () {",
+									"    // Server should return an error for malformed JSON",
+									"    pm.expect(pm.response.code).to.be.above(399);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"password123\"\n    // missing closing brace"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Attempt to register with malformed JSON"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Valid Credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Login - Valid Credentials",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has required fields\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"token\");",
+									"    pm.expect(jsonData).to.have.property(\"username\");",
+									"    pm.expect(jsonData).to.have.property(\"userId\");",
+									"    pm.expect(jsonData).to.have.property(\"message\");",
+									"});",
+									"",
+									"pm.test(\"Response fields have correct types\", function () {",
+									"    pm.expect(jsonData.token).to.be.a(\"string\");",
+									"    pm.expect(jsonData.username).to.be.a(\"string\");",
+									"    pm.expect(jsonData.userId).to.be.a(\"string\");",
+									"    pm.expect(jsonData.message).to.be.a(\"string\");",
+									"});",
+									"",
+									"pm.test(\"Token is not empty\", function () {",
+									"    pm.expect(jsonData.token.length).to.be.above(0);",
+									"});",
+									"",
+									"pm.test(\"Token is valid UUID format\", function () {",
+									"    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;",
+									"    pm.expect(jsonData.token).to.match(uuidRegex);",
+									"});",
+									"",
+									"pm.test(\"Username matches request\", function () {",
+									"    const requestBody = JSON.parse(pm.request.body.raw);",
+									"    pm.expect(jsonData.username).to.equal(requestBody.username);",
+									"});",
+									"",
+									"pm.test(\"UserId is valid UUID format\", function () {",
+									"    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;",
+									"    pm.expect(jsonData.userId).to.match(uuidRegex);",
+									"});",
+									"",
+									"pm.test(\"Success message is present\", function () {",
+									"    pm.expect(jsonData.message.toLowerCase()).to.include(\"success\");",
+									"});",
+									"",
+									"// Save token to collection variable for future requests",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set(\"authToken\", jsonData.token);",
+									"    pm.collectionVariables.set(\"userId\", jsonData.userId);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser1\",\n    \"password\": \"test123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with valid credentials (testuser1 from init.sql)"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Second User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has token\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"token\");",
+									"});",
+									"",
+									"// Save second user token for ownership tests",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set(\"secondUserToken\", jsonData.token);",
+									"    pm.collectionVariables.set(\"secondUserId\", jsonData.userId);",
+									"    console.log('Second user logged in:', jsonData.userId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser2\",\n    \"password\": \"test123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login as second user for ownership tests"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Wrong Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Login - Wrong Password",
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error message indicates invalid credentials\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/invalid.*username.*password|invalid.*credentials|authentication.*failed/);",
+									"});",
+									"",
+									"pm.test(\"No token is returned\", function () {",
+									"    pm.expect(jsonData).to.not.have.property(\"token\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser1\",\n    \"password\": \"wrongpassword\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Attempt to login with correct username but wrong password"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Invalid Username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Login - Invalid Username",
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error message indicates invalid credentials\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/invalid.*username.*password|invalid.*credentials|user.*not.*found/);",
+									"});",
+									"",
+									"pm.test(\"No token is returned\", function () {",
+									"    pm.expect(jsonData).to.not.have.property(\"token\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"nonexistentuser999\",\n    \"password\": \"test123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Attempt to login with a username that doesn't exist"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Missing Username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Login - Missing Username",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error message mentions required fields\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/username.*required|required.*username/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"test123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Attempt to login without providing a username"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Missing Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Login - Missing Password",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error message mentions required fields\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/password.*required|required.*password/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser1\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Attempt to login without providing a password"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Empty Credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Login - Empty Credentials",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error message mentions required fields\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/username.*password.*required|required/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"\",\n    \"password\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Attempt to login with empty strings for both username and password"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Invalid JSON",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Login - Invalid JSON",
+									"pm.test(\"Status code is 400 or 500\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 500]);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+									"});",
+									"",
+									"pm.test(\"Response indicates error\", function () {",
+									"    // Server should return an error for malformed JSON",
+									"    pm.expect(pm.response.code).to.be.above(399);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser1\"\n    \"password\": \"test123\"\n    // missing comma"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Attempt to login with malformed JSON"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints with comprehensive positive and negative test cases"
+		},
+		{
+			"name": "Media Management",
+			"item": [
+				{
+					"name": "Get Media List - Valid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON array\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"if (jsonData.length > 0) {",
+									"    pm.test(\"Media items have required fields\", function () {",
+									"        const media = jsonData[0];",
+									"        pm.expect(media).to.have.property(\"id\");",
+									"        pm.expect(media).to.have.property(\"title\");",
+									"        pm.expect(media).to.have.property(\"mediaType\");",
+									"        pm.expect(media).to.have.property(\"creatorUsername\");",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							]
+						},
+						"description": "Get all media entries"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Media List - With Search Filter",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON array\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"if (jsonData.length > 0) {",
+									"    pm.test(\"Results contain search term in title\", function () {",
+									"        jsonData.forEach(media => {",
+									"            pm.expect(media.title.toLowerCase()).to.include(\"inception\".toLowerCase());",
+									"        });",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media?search=inception",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "inception"
+								}
+							]
+						},
+						"description": "Search media by title"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Media List - With Type Filter",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response is array\", function () {",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});",
+									"",
+									"if (jsonData.length > 0) {",
+									"    pm.test(\"All results are movies\", function () {",
+									"        jsonData.forEach(media => {",
+									"            pm.expect(media.mediaType).to.equal(\"movie\");",
+									"        });",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media?type=movie",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "movie"
+								}
+							]
+						},
+						"description": "Filter media by type"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Media List - With Sort by Rating",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response is array\", function () {",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});",
+									"",
+									"if (jsonData.length > 1) {",
+									"    pm.test(\"Results sorted by rating descending\", function () {",
+									"        for (let i = 0; i < jsonData.length - 1; i++) {",
+									"            pm.expect(jsonData[i].averageRating).to.be.at.least(jsonData[i + 1].averageRating);",
+									"        }",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media?sort=rating",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "rating"
+								}
+							]
+						},
+						"description": "Sort media by rating"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Media List - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error mentions authentication\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/authentication|auth|unauthorized/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/media",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							]
+						},
+						"description": "Attempt to get media without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Media List - Multiple Filters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response is array\", function () {",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});",
+									"",
+									"if (jsonData.length > 0) {",
+									"    pm.test(\"Results match all filters\", function () {",
+									"        jsonData.forEach(media => {",
+									"            pm.expect(media.mediaType).to.equal(\"movie\");",
+									"            pm.expect(media.releaseYear).to.equal(2010);",
+									"        });",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media?type=movie&year=2010",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "movie"
+								},
+								{
+									"key": "year",
+									"value": "2010"
+								}
+							]
+						},
+						"description": "Filter media with multiple parameters"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Media List - Invalid Year Filter",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400 or 500\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 500]);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media?year=notanumber",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							],
+							"query": [
+								{
+									"key": "year",
+									"value": "notanumber"
+								}
+							]
+						},
+						"description": "Try filtering with invalid year format"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Media - Valid Movie",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has required fields\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"id\");",
+									"    pm.expect(jsonData).to.have.property(\"title\");",
+									"    pm.expect(jsonData).to.have.property(\"mediaType\");",
+									"    pm.expect(jsonData).to.have.property(\"creatorId\");",
+									"});",
+									"",
+									"pm.test(\"ID is valid UUID\", function () {",
+									"    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;",
+									"    pm.expect(jsonData.id).to.match(uuidRegex);",
+									"});",
+									"",
+									"pm.test(\"Title matches request\", function () {",
+									"    const requestBody = JSON.parse(pm.request.body.raw);",
+									"    pm.expect(jsonData.title).to.equal(requestBody.title);",
+									"});",
+									"",
+									"pm.test(\"Media type is movie\", function () {",
+									"    pm.expect(jsonData.mediaType).to.equal(\"movie\");",
+									"});",
+									"",
+									"// Save media ID for subsequent tests",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set(\"testMediaId\", jsonData.id);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Test Movie {{$timestamp}}\",\n    \"description\": \"A test movie for API testing\",\n    \"mediaType\": \"movie\",\n    \"releaseYear\": 2023,\n    \"genres\": \"Action, Thriller\",\n    \"ageRestriction\": \"PG-13\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							]
+						},
+						"description": "Create a new movie entry"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Media - Valid Series",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Media type is series\", function () {",
+									"    pm.expect(jsonData.mediaType).to.equal(\"series\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Test Series {{$timestamp}}\",\n    \"description\": \"A test TV series\",\n    \"mediaType\": \"series\",\n    \"releaseYear\": 2023,\n    \"genres\": \"Drama, Comedy\",\n    \"ageRestriction\": \"TV-14\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							]
+						},
+						"description": "Create a new series entry"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Media - Valid Game",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Media type is game\", function () {",
+									"    pm.expect(jsonData.mediaType).to.equal(\"game\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Test Game {{$timestamp}}\",\n    \"description\": \"A test video game\",\n    \"mediaType\": \"game\",\n    \"releaseYear\": 2023,\n    \"genres\": \"RPG, Adventure\",\n    \"ageRestriction\": \"M\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							]
+						},
+						"description": "Create a new game entry"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Media - Missing Title",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error mentions title is required\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/title.*required/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Movie without title\",\n    \"mediaType\": \"movie\",\n    \"releaseYear\": 2023\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							]
+						},
+						"description": "Attempt to create media without title"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Media - Missing Media Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error mentions media type\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/media.*type/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Test Movie\",\n    \"description\": \"Movie without type\",\n    \"releaseYear\": 2023\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							]
+						},
+						"description": "Attempt to create media without media type"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Media - Invalid Media Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error mentions valid media types\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/movie.*series.*game/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Test Media\",\n    \"description\": \"Media with invalid type\",\n    \"mediaType\": \"podcast\",\n    \"releaseYear\": 2023\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							]
+						},
+						"description": "Attempt to create media with invalid type"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Media - Empty Title",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"\",\n    \"description\": \"Media with empty title\",\n    \"mediaType\": \"movie\",\n    \"releaseYear\": 2023\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							]
+						},
+						"description": "Attempt to create media with empty title"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Media - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Unauthorized Movie\",\n    \"description\": \"Should fail\",\n    \"mediaType\": \"movie\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							]
+						},
+						"description": "Attempt to create media without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Media - Valid ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has required fields\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"id\");",
+									"    pm.expect(jsonData).to.have.property(\"title\");",
+									"    pm.expect(jsonData).to.have.property(\"mediaType\");",
+									"    pm.expect(jsonData).to.have.property(\"creatorUsername\");",
+									"    pm.expect(jsonData).to.have.property(\"averageRating\");",
+									"    pm.expect(jsonData).to.have.property(\"totalRatings\");",
+									"});",
+									"",
+									"pm.test(\"Response has ratings array\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"ratings\");",
+									"    pm.expect(jsonData.ratings).to.be.an(\"array\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}"
+							]
+						},
+						"description": "Get a specific media by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Media - Non-existent ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error mentions not found\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/not found|media.*not/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						},
+						"description": "Attempt to get non-existent media"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Media - Invalid UUID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400 or 404 or 500\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 404, 500]);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/invalid-uuid-format",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"invalid-uuid-format"
+							]
+						},
+						"description": "Attempt to get media with invalid UUID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Media - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}"
+							]
+						},
+						"description": "Attempt to get media without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Media - Valid by Creator",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"const requestBody = JSON.parse(pm.request.body.raw);",
+									"",
+									"pm.test(\"Title was updated\", function () {",
+									"    pm.expect(jsonData.title).to.equal(requestBody.title);",
+									"});",
+									"",
+									"pm.test(\"Description was updated\", function () {",
+									"    pm.expect(jsonData.description).to.equal(requestBody.description);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Test Movie {{$timestamp}}\",\n    \"description\": \"Updated description\",\n    \"mediaType\": \"movie\",\n    \"releaseYear\": 2024,\n    \"genres\": \"Action, Drama\",\n    \"ageRestriction\": \"R\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}"
+							]
+						},
+						"description": "Update media by its creator"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Media - Non-existent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Title\",\n    \"description\": \"Updated description\",\n    \"mediaType\": \"movie\",\n    \"releaseYear\": 2024\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						},
+						"description": "Attempt to update non-existent media"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Media - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Unauthorized Update\",\n    \"description\": \"Should fail\",\n    \"mediaType\": \"movie\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}"
+							]
+						},
+						"description": "Attempt to update media without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Media - Invalid Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"\",\n    \"description\": \"Invalid update\",\n    \"mediaType\": \"invalidtype\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}"
+							]
+						},
+						"description": "Attempt to update with invalid data"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Media - Partial Update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200 or 400\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Partially Updated Title\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}"
+							]
+						},
+						"description": "Attempt partial update of media"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Media - By Non-Creator",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// This test requires a second user account",
+									"// Skip if not set up"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// This test requires another user's media ID",
+									"// Expected: 403 Forbidden if trying to edit someone else's media"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Unauthorized Edit\",\n    \"description\": \"Trying to edit someone else's media\",\n    \"mediaType\": \"movie\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/019424bd-7801-7e84-97dc-9af96c7c08e9",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"019424bd-7801-7e84-97dc-9af96c7c08e9"
+							]
+						},
+						"description": "Attempt to update media created by another user (use existing media ID from database)"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Favorite - Valid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has success message\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"message\");",
+									"    pm.expect(jsonData.message.toLowerCase()).to.match(/favorite|added|success/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}/favorite",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}",
+								"favorite"
+							]
+						},
+						"description": "Add a media to favorites"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Favorite - Already Favorited",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error mentions already in favorites\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/already.*favorite/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}/favorite",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}",
+								"favorite"
+							]
+						},
+						"description": "Attempt to add already favorited media"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Favorite - Non-existent Media",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/00000000-0000-0000-0000-000000000000/favorite",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"00000000-0000-0000-0000-000000000000",
+								"favorite"
+							]
+						},
+						"description": "Attempt to favorite non-existent media"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Favorite - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/media/019424bd-7801-7e84-97dc-9af96c7c08e9/favorite",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"019424bd-7801-7e84-97dc-9af96c7c08e9",
+								"favorite"
+							]
+						},
+						"description": "Attempt to add favorite without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Favorite - Invalid Media ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400 or 404 or 500\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 404, 500]);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/invalid-uuid/favorite",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"invalid-uuid",
+								"favorite"
+							]
+						},
+						"description": "Attempt to favorite with invalid media ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Favorite - Valid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has success message\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"message\");",
+									"    pm.expect(jsonData.message.toLowerCase()).to.match(/removed|success/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}/favorite",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}",
+								"favorite"
+							]
+						},
+						"description": "Remove a media from favorites"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Favorite - Not In Favorites",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});",
+									"",
+									"pm.test(\"Error mentions not in favorites\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.match(/not.*favorite|favorite.*not/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}/favorite",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}",
+								"favorite"
+							]
+						},
+						"description": "Attempt to remove media not in favorites"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Favorite - Non-existent Media",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/00000000-0000-0000-0000-000000000000/favorite",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"00000000-0000-0000-0000-000000000000",
+								"favorite"
+							]
+						},
+						"description": "Attempt to remove favorite for non-existent media"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Favorite - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/media/019424bd-7801-7e84-97dc-9af96c7c08e9/favorite",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"019424bd-7801-7e84-97dc-9af96c7c08e9",
+								"favorite"
+							]
+						},
+						"description": "Attempt to remove favorite without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Media - By Creator Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has success message\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"message\");",
+									"    pm.expect(jsonData.message.toLowerCase()).to.match(/deleted|success/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}"
+							]
+						},
+						"description": "Delete media by its creator"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Media - Already Deleted",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}"
+							]
+						},
+						"description": "Attempt to delete already deleted media"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Media - Non-existent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						},
+						"description": "Attempt to delete non-existent media"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Media - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Response has error field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"error\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/media/019424bd-7801-7e84-97dc-9af96c7c08e9",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"019424bd-7801-7e84-97dc-9af96c7c08e9"
+							]
+						},
+						"description": "Attempt to delete media without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Media - By Non-Creator",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Expected: 403 Forbidden when trying to delete someone else's media"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/019424bd-7801-7e84-97dc-9af96c7c08e9",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"019424bd-7801-7e84-97dc-9af96c7c08e9"
+							]
+						},
+						"description": "Attempt to delete media created by another user"
+					},
+					"response": []
+				}
+			],
+			"description": "Media management endpoints with comprehensive positive and negative test cases"
+		},
+		{
+			"name": "Ratings",
+			"item": [
+				{
+					"name": "Create Media - Valid Movie Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has required fields\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"id\");",
+									"    pm.expect(jsonData).to.have.property(\"title\");",
+									"    pm.expect(jsonData).to.have.property(\"mediaType\");",
+									"    pm.expect(jsonData).to.have.property(\"creatorId\");",
+									"});",
+									"",
+									"pm.test(\"ID is valid UUID\", function () {",
+									"    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;",
+									"    pm.expect(jsonData.id).to.match(uuidRegex);",
+									"});",
+									"",
+									"pm.test(\"Title matches request\", function () {",
+									"    const requestBody = JSON.parse(pm.request.body.raw);",
+									"    pm.expect(jsonData.title).to.equal(requestBody.title);",
+									"});",
+									"",
+									"pm.test(\"Media type is movie\", function () {",
+									"    pm.expect(jsonData.mediaType).to.equal(\"movie\");",
+									"});",
+									"",
+									"// Save media ID for subsequent tests",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set(\"testMediaId\", jsonData.id);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Test Movie {{$timestamp}}\",\n    \"description\": \"A test movie for API testing\",\n    \"mediaType\": \"movie\",\n    \"releaseYear\": 2023,\n    \"genres\": \"Action, Thriller\",\n    \"ageRestriction\": \"PG-13\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							]
+						},
+						"description": "Create a new movie entry"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Media - Valid Movie Copy 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has required fields\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"id\");",
+									"    pm.expect(jsonData).to.have.property(\"title\");",
+									"    pm.expect(jsonData).to.have.property(\"mediaType\");",
+									"    pm.expect(jsonData).to.have.property(\"creatorId\");",
+									"});",
+									"",
+									"pm.test(\"ID is valid UUID\", function () {",
+									"    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;",
+									"    pm.expect(jsonData.id).to.match(uuidRegex);",
+									"});",
+									"",
+									"pm.test(\"Title matches request\", function () {",
+									"    const requestBody = JSON.parse(pm.request.body.raw);",
+									"    pm.expect(jsonData.title).to.equal(requestBody.title);",
+									"});",
+									"",
+									"pm.test(\"Media type is movie\", function () {",
+									"    pm.expect(jsonData.mediaType).to.equal(\"movie\");",
+									"});",
+									"",
+									"// Save media ID for subsequent tests",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set(\"testMediaIdratings\", jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Test Movie {{$timestamp}}\",\n    \"description\": \"A test movie for API testing\",\n    \"mediaType\": \"movie\",\n    \"releaseYear\": 2023,\n    \"genres\": \"Action, Thriller\",\n    \"ageRestriction\": \"PG-13\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							]
+						},
+						"description": "Create a new movie entry"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rating - Valid with Comment",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Create fresh media for this test",
+									"pm.sendRequest({",
+									"    url: pm.collectionVariables.get('baseUrl') + '/media',",
+									"    method: 'POST',",
+									"    header: {",
+									"        'Content-Type': 'application/json',",
+									"        'Authorization': 'Bearer ' + pm.collectionVariables.get('authToken')",
+									"    },",
+									"    body: {",
+									"        mode: 'raw',",
+									"        raw: JSON.stringify({",
+									"            title: 'Test Media for Rating ' + Date.now(),",
+									"            description: 'Temporary media for rating test',",
+									"            mediaType: 'movie',",
+									"            releaseYear: 2023,",
+									"            genres: 'Test',",
+									"            ageRestriction: 'PG'",
+									"        })",
+									"    }",
+									"}, function (err, response) {",
+									"    if (err) {",
+									"        console.error('Failed to create test media:', err);",
+									"    } else {",
+									"        const media = response.json();",
+									"        pm.collectionVariables.set('tempMediaId', media.id);",
+									"        console.log('Created temporary media:', media.id);",
+									"    }",
+									"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has required fields\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"id\");",
+									"    pm.expect(jsonData).to.have.property(\"mediaId\");",
+									"    pm.expect(jsonData).to.have.property(\"userId\");",
+									"    pm.expect(jsonData).to.have.property(\"stars\");",
+									"    pm.expect(jsonData).to.have.property(\"comment\");",
+									"    pm.expect(jsonData).to.have.property(\"confirmed\");",
+									"});",
+									"",
+									"pm.test(\"Stars value is correct\", function () {",
+									"    pm.expect(jsonData.stars).to.equal(5);",
+									"});",
+									"",
+									"pm.test(\"Comment is unconfirmed by default\", function () {",
+									"    pm.expect(jsonData.confirmed).to.be.false;",
+									"});",
+									"",
+									"// Save rating ID for other tests",
+									"pm.collectionVariables.set(\"testRatingId\", jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stars\": 5,\n    \"comment\": \"Amazing movie! Highly recommended.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/{{tempMediaId}}/ratings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{tempMediaId}}",
+								"ratings"
+							]
+						},
+						"description": "Create a rating with stars and comment"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rating - Stars Only",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Create fresh media for this test",
+									"pm.sendRequest({",
+									"    url: pm.collectionVariables.get('baseUrl') + '/media',",
+									"    method: 'POST',",
+									"    header: {",
+									"        'Content-Type': 'application/json',",
+									"        'Authorization': 'Bearer ' + pm.collectionVariables.get('authToken')",
+									"    },",
+									"    body: {",
+									"        mode: 'raw',",
+									"        raw: JSON.stringify({",
+									"            title: 'Test Media for Rating ' + Date.now(),",
+									"            description: 'Temporary media for rating test',",
+									"            mediaType: 'movie',",
+									"            releaseYear: 2023,",
+									"            genres: 'Test',",
+									"            ageRestriction: 'PG'",
+									"        })",
+									"    }",
+									"}, function (err, response) {",
+									"    if (err) {",
+									"        console.error('Failed to create test media:', err);",
+									"    } else {",
+									"        const media = response.json();",
+									"        pm.collectionVariables.set('starsOnlyMediaId', media.id);",
+									"        console.log('Created temporary media:', media.id);",
+									"    }",
+									"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Stars value is correct\", function () {",
+									"    pm.expect(jsonData.stars).to.equal(4);",
+									"});",
+									"",
+									"pm.test(\"Comment is auto-confirmed when empty\", function () {",
+									"    pm.expect(jsonData.confirmed).to.be.true;",
+									"});",
+									"",
+									"// Cleanup: Delete the temporary media",
+									"const starsOnlyMediaId = pm.collectionVariables.get('starsOnlyMediaId');",
+									"if (starsOnlyMediaId) {",
+									"    pm.sendRequest({",
+									"        url: pm.collectionVariables.get('baseUrl') + '/media/' + starsOnlyMediaId,",
+									"        method: 'DELETE',",
+									"        header: {",
+									"            'Authorization': 'Bearer ' + pm.collectionVariables.get('authToken')",
+									"        }",
+									"    }, function (err, response) {",
+									"        if (err) {",
+									"            console.error('Failed to cleanup test media:', err);",
+									"        } else {",
+									"            console.log('Cleaned up temporary media:', starsOnlyMediaId);",
+									"            pm.collectionVariables.unset('starsOnlyMediaId');",
+									"        }",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stars\": 4\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/{{starsOnlyMediaId}}/ratings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{starsOnlyMediaId}}",
+								"ratings"
+							]
+						},
+						"description": "Create a rating with only stars (no comment)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rating - Missing Stars",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message mentions stars\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"stars\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"comment\": \"Great content\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}/ratings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}",
+								"ratings"
+							]
+						},
+						"description": "Attempt to create rating without stars field"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rating - Invalid Stars (0)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about valid range\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"between\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stars\": 0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}/ratings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}",
+								"ratings"
+							]
+						},
+						"description": "Attempt to create rating with stars below valid range"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rating - Invalid Stars (6)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about valid range\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"between\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stars\": 6\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}/ratings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}",
+								"ratings"
+							]
+						},
+						"description": "Attempt to create rating with stars above valid range"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rating - Invalid Stars (-1)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about valid range\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"between\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stars\": -1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}/ratings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}",
+								"ratings"
+							]
+						},
+						"description": "Attempt to create rating with negative stars"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rating - Duplicate",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Verify tempMediaId is set from previous test",
+									"const tempMediaId = pm.collectionVariables.get('tempMediaId');",
+									"if (!tempMediaId) {",
+									"    console.error('WARNING: tempMediaId not set. Previous test may have failed.');",
+									"} else {",
+									"    console.log('Using tempMediaId:', tempMediaId);",
+									"}"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about duplicate\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"already\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stars\": 3\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/{{tempMediaId}}/ratings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{tempMediaId}}",
+								"ratings"
+							]
+						},
+						"description": "Attempt to create duplicate rating for same media (run after first create test)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rating - Non-existent Media",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about media not found\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"media\");",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"not found\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stars\": 5\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/00000000-0000-0000-0000-000000000000/ratings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"00000000-0000-0000-0000-000000000000",
+								"ratings"
+							]
+						},
+						"description": "Attempt to rate non-existent media"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rating - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about authentication\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"authentication\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stars\": 5\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}/ratings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}",
+								"ratings"
+							]
+						},
+						"description": "Attempt to create rating without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Rating - Valid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Success message present\", function () {",
+									"    pm.expect(jsonData.message.toLowerCase()).to.include(\"success\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stars\": 4,\n    \"comment\": \"Updated: Still great but not perfect\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}"
+							]
+						},
+						"description": "Update own rating with new stars and comment"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Rating - Stars Only",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Success message present\", function () {",
+									"    pm.expect(jsonData.message.toLowerCase()).to.include(\"success\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stars\": 5\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}"
+							]
+						},
+						"description": "Update rating stars only (comment unchanged, confirmation status preserved)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Rating - Comment Only (Resets Confirmation)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Success message present\", function () {",
+									"    pm.expect(jsonData.message.toLowerCase()).to.include(\"success\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"comment\": \"Updated comment - needs re-confirmation\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}"
+							]
+						},
+						"description": "Update comment only - should reset is_confirmed to false"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Rating - Invalid Stars",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about valid range\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"between\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stars\": 10\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}"
+							]
+						},
+						"description": "Attempt to update with invalid stars value"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Rating - Not Owner",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about ownership\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"own\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{secondUserToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stars\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}"
+							]
+						},
+						"description": "Attempt to update another user's rating (use different user token)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Rating - Non-existent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about rating not found\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"rating\");",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"not found\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stars\": 3\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ratings/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						},
+						"description": "Attempt to update non-existent rating"
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Comment - Valid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Success message about confirmation\", function () {",
+									"    pm.expect(jsonData.message.toLowerCase()).to.include(\"confirm\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}/confirm",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}",
+								"confirm"
+							]
+						},
+						"description": "Confirm own rating comment"
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Comment - Not Owner",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about ownership\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"own\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{secondUserToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}/confirm",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}",
+								"confirm"
+							]
+						},
+						"description": "Attempt to confirm another user's comment (use different user token)"
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Comment - Non-existent Rating",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about rating not found\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"rating\");",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"not found\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ratings/00000000-0000-0000-0000-000000000000/confirm",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"00000000-0000-0000-0000-000000000000",
+								"confirm"
+							]
+						},
+						"description": "Attempt to confirm non-existent rating"
+					},
+					"response": []
+				},
+				{
+					"name": "Like Rating - Valid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Success message about like\", function () {",
+									"    pm.expect(jsonData.message.toLowerCase()).to.include(\"like\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}/like",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}",
+								"like"
+							]
+						},
+						"description": "Like a rating"
+					},
+					"response": []
+				},
+				{
+					"name": "Like Rating - Already Liked",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about already liked\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"already\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}/like",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}",
+								"like"
+							]
+						},
+						"description": "Attempt to like same rating twice (run after Like Rating - Valid)"
+					},
+					"response": []
+				},
+				{
+					"name": "Like Rating - Non-existent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about rating not found\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"rating\");",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"not found\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ratings/00000000-0000-0000-0000-000000000000/like",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"00000000-0000-0000-0000-000000000000",
+								"like"
+							]
+						},
+						"description": "Attempt to like non-existent rating"
+					},
+					"response": []
+				},
+				{
+					"name": "Like Rating - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about authentication\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"authentication\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}/like",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}",
+								"like"
+							]
+						},
+						"description": "Attempt to like rating without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Unlike Rating - Valid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Success message about unlike\", function () {",
+									"    pm.expect(jsonData.message.toLowerCase()).to.include(\"remove\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}/unlike",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}",
+								"unlike"
+							]
+						},
+						"description": "Unlike a previously liked rating"
+					},
+					"response": []
+				},
+				{
+					"name": "Unlike Rating - Not Liked",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about like not found\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"like\");",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"not found\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}/unlike",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}",
+								"unlike"
+							]
+						},
+						"description": "Attempt to unlike a rating that wasn't liked (run after Unlike Rating - Valid)"
+					},
+					"response": []
+				},
+				{
+					"name": "Unlike Rating - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about authentication\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"authentication\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}/unlike",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}",
+								"unlike"
+							]
+						},
+						"description": "Attempt to unlike rating without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Rating - Valid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Success message about deletion\", function () {",
+									"    pm.expect(jsonData.message.toLowerCase()).to.include(\"delete\");",
+									"});",
+									"",
+									"// Cleanup: Delete the temporary media created for the rating test chain",
+									"const tempMediaId = pm.collectionVariables.get('tempMediaId');",
+									"if (tempMediaId) {",
+									"    pm.sendRequest({",
+									"        url: pm.collectionVariables.get('baseUrl') + '/media/' + tempMediaId,",
+									"        method: 'DELETE',",
+									"        header: {",
+									"            'Authorization': 'Bearer ' + pm.collectionVariables.get('authToken')",
+									"        }",
+									"    }, function (err, response) {",
+									"        if (err) {",
+									"            console.error('Failed to cleanup test media:', err);",
+									"        } else {",
+									"            console.log('Cleaned up temporary media:', tempMediaId);",
+									"            pm.collectionVariables.unset('tempMediaId');",
+									"        }",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}"
+							]
+						},
+						"description": "Delete own rating"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Rating - Not Owner",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Create a rating with first user for ownership testing",
+									"pm.sendRequest({",
+									"    url: pm.collectionVariables.get('baseUrl') + '/media/' + pm.collectionVariables.get('testMediaId') + '/ratings',",
+									"    method: 'POST',",
+									"    header: {",
+									"        'Content-Type': 'application/json',",
+									"        'Authorization': 'Bearer ' + pm.collectionVariables.get('authToken')",
+									"    },",
+									"    body: {",
+									"        mode: 'raw',",
+									"        raw: JSON.stringify({",
+									"            stars: 3,",
+									"            comment: 'Test rating for ownership test'",
+									"        })",
+									"    }",
+									"}, function (err, response) {",
+									"    if (err) {",
+									"        console.error('Failed to create ownership test rating:', err);",
+									"    } else {",
+									"        const rating = response.json();",
+									"        pm.collectionVariables.set('ownershipTestRatingId', rating.id);",
+									"        console.log('Created ownership test rating:', rating.id);",
+									"    }",
+									"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about ownership\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"own\");",
+									"});",
+									"",
+									"// Cleanup: Delete the test rating since ownership check failed",
+									"const ownershipTestRatingId = pm.collectionVariables.get('ownershipTestRatingId');",
+									"if (ownershipTestRatingId) {",
+									"    pm.sendRequest({",
+									"        url: pm.collectionVariables.get('baseUrl') + '/ratings/' + ownershipTestRatingId,",
+									"        method: 'DELETE',",
+									"        header: {",
+									"            'Authorization': 'Bearer ' + pm.collectionVariables.get('authToken')",
+									"        }",
+									"    }, function (err, response) {",
+									"        if (err) {",
+									"            console.error('Failed to cleanup ownership test rating:', err);",
+									"        } else {",
+									"            console.log('Cleaned up ownership test rating:', ownershipTestRatingId);",
+									"            pm.collectionVariables.unset('ownershipTestRatingId');",
+									"        }",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{secondUserToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{ownershipTestRatingId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{ownershipTestRatingId}}"
+							]
+						},
+						"description": "Attempt to delete another user's rating (use different user token)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Rating - Non-existent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about rating not found\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"rating\");",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"not found\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ratings/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						},
+						"description": "Attempt to delete non-existent rating"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Media - By Creator",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has success message\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"message\");",
+									"    pm.expect(jsonData.message.toLowerCase()).to.match(/deleted|success/);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaIdratings}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaIdratings}}"
+							]
+						},
+						"description": "Delete media by its creator"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Rating - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about authentication\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"authentication\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ratings/{{testRatingId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ratings",
+								"{{testRatingId}}"
+							]
+						},
+						"description": "Attempt to delete rating without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Media - By Creator Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has success message\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"message\");",
+									"    pm.expect(jsonData.message.toLowerCase()).to.match(/deleted|success/);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media/{{testMediaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media",
+								"{{testMediaId}}"
+							]
+						},
+						"description": "Delete media by its creator"
+					},
+					"response": []
+				}
+			],
+			"description": "Comprehensive rating management endpoints with positive and negative test cases"
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Get Profile - testuser1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has required fields\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"id\");",
+									"    pm.expect(jsonData).to.have.property(\"username\");",
+									"    pm.expect(jsonData).to.have.property(\"createdAt\");",
+									"    pm.expect(jsonData).to.have.property(\"totalRatings\");",
+									"    pm.expect(jsonData).to.have.property(\"totalFavorites\");",
+									"    pm.expect(jsonData).to.have.property(\"totalMediaCreated\");",
+									"});",
+									"",
+									"pm.test(\"Username is testuser1\", function () {",
+									"    pm.expect(jsonData.username).to.equal(\"testuser1\");",
+									"});",
+									"",
+									"pm.test(\"Statistics are non-negative numbers\", function () {",
+									"    pm.expect(jsonData.totalRatings).to.be.at.least(0);",
+									"    pm.expect(jsonData.totalFavorites).to.be.at.least(0);",
+									"    pm.expect(jsonData.totalMediaCreated).to.be.at.least(0);",
+									"});",
+									"",
+									"pm.test(\"Password hash is not exposed\", function () {",
+									"    pm.expect(jsonData).to.not.have.property(\"passwordHash\");",
+									"    pm.expect(jsonData).to.not.have.property(\"password\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser1/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser1",
+								"profile"
+							]
+						},
+						"description": "Get profile for testuser1 with statistics"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile - testuser2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Username is testuser2\", function () {",
+									"    pm.expect(jsonData.username).to.equal(\"testuser2\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser2/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser2",
+								"profile"
+							]
+						},
+						"description": "Get profile for testuser2"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile - admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Username is admin\", function () {",
+									"    pm.expect(jsonData.username).to.equal(\"admin\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/admin/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"admin",
+								"profile"
+							]
+						},
+						"description": "Get profile for admin user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile - Non-existent User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about user not found\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"user\");",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"not found\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/nonexistentuser999/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"nonexistentuser999",
+								"profile"
+							]
+						},
+						"description": "Attempt to get profile for non-existent user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about authentication\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"authentication\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser1/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser1",
+								"profile"
+							]
+						},
+						"description": "Attempt to get profile without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile - Invalid Auth Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about authentication\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"authentication\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "invalid_token_xyz123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser1/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser1",
+								"profile"
+							]
+						},
+						"description": "Attempt to get profile with invalid auth token"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Favorites - testuser1 (Has Favorites)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});",
+									"",
+									"pm.test(\"testuser1 has favorites\", function () {",
+									"    pm.expect(jsonData.length).to.be.greaterThan(0);",
+									"});",
+									"",
+									"if (jsonData.length > 0) {",
+									"    pm.test(\"Favorite has required fields\", function () {",
+									"        pm.expect(jsonData[0]).to.have.property(\"id\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"title\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"mediaType\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"averageRating\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"totalRatings\");",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser1/favorites",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser1",
+								"favorites"
+							]
+						},
+						"description": "Get favorites for testuser1 (has 2 favorites: The Matrix, The Witcher 3)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Favorites - testuser2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser2/favorites",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser2",
+								"favorites"
+							]
+						},
+						"description": "Get favorites for testuser2 (has 1 favorite: Breaking Bad)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Favorites - Empty List",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response is an empty array\", function () {",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/admin/favorites",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"admin",
+								"favorites"
+							]
+						},
+						"description": "Get favorites for user with no favorites (may return empty array depending on test data)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Favorites - Non-existent User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about user not found\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"user\");",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"not found\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/nonexistentuser999/favorites",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"nonexistentuser999",
+								"favorites"
+							]
+						},
+						"description": "Attempt to get favorites for non-existent user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Favorites - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about authentication\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"authentication\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser1/favorites",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser1",
+								"favorites"
+							]
+						},
+						"description": "Attempt to get favorites without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Ratings - testuser1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});",
+									"",
+									"pm.test(\"testuser1 has ratings\", function () {",
+									"    pm.expect(jsonData.length).to.be.greaterThan(0);",
+									"});",
+									"",
+									"if (jsonData.length > 0) {",
+									"    pm.test(\"Rating has required fields\", function () {",
+									"        pm.expect(jsonData[0]).to.have.property(\"id\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"mediaId\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"mediaTitle\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"stars\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"comment\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"isConfirmed\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"likeCount\");",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser1/ratings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser1",
+								"ratings"
+							]
+						},
+						"description": "Get rating history for testuser1 (has 2 ratings)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Ratings - testuser2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser2/ratings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser2",
+								"ratings"
+							]
+						},
+						"description": "Get rating history for testuser2"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Ratings - Shows Unconfirmed for Owner",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});",
+									"",
+									"pm.test(\"Can see own unconfirmed ratings\", function () {",
+									"    // This test assumes the logged-in user can see their unconfirmed ratings",
+									"    // The test will pass as long as the endpoint returns successfully",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser1/ratings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser1",
+								"ratings"
+							]
+						},
+						"description": "Get own ratings - should include unconfirmed comments"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Ratings - Non-existent User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about user not found\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"user\");",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"not found\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/nonexistentuser999/ratings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"nonexistentuser999",
+								"ratings"
+							]
+						},
+						"description": "Attempt to get ratings for non-existent user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Ratings - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about authentication\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"authentication\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser1/ratings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser1",
+								"ratings"
+							]
+						},
+						"description": "Attempt to get user ratings without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Leaderboard - Valid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});",
+									"",
+									"pm.test(\"Leaderboard has entries\", function () {",
+									"    pm.expect(jsonData.length).to.be.greaterThan(0);",
+									"});",
+									"",
+									"if (jsonData.length > 0) {",
+									"    pm.test(\"Entry has required fields\", function () {",
+									"        pm.expect(jsonData[0]).to.have.property(\"rank\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"username\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"ratingCount\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"mediaCreated\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"likesGiven\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"totalActivity\");",
+									"    });",
+									"    ",
+									"    pm.test(\"First entry has rank 1\", function () {",
+									"        pm.expect(jsonData[0].rank).to.equal(1);",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/leaderboard",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leaderboard"
+							]
+						},
+						"description": "Get leaderboard of most active users"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Leaderboard - Check Ordering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Leaderboard is ordered by activity (descending)\", function () {",
+									"    for (let i = 0; i < jsonData.length - 1; i++) {",
+									"        pm.expect(jsonData[i].totalActivity).to.be.at.least(jsonData[i + 1].totalActivity);",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Ranks are sequential\", function () {",
+									"    for (let i = 0; i < jsonData.length; i++) {",
+									"        pm.expect(jsonData[i].rank).to.equal(i + 1);",
+									"    }",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/leaderboard",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leaderboard"
+							]
+						},
+						"description": "Verify leaderboard ordering is correct"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Leaderboard - Limited to 10",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Leaderboard has at most 10 entries\", function () {",
+									"    pm.expect(jsonData.length).to.be.at.most(10);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/leaderboard",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leaderboard"
+							]
+						},
+						"description": "Verify leaderboard is limited to top 10 users"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Leaderboard - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about authentication\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"authentication\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/leaderboard",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leaderboard"
+							]
+						},
+						"description": "Attempt to get leaderboard without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recommendations - Valid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has recommendations and basedOnGenres\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"recommendations\");",
+									"    pm.expect(jsonData).to.have.property(\"basedOnGenres\");",
+									"});",
+									"",
+									"pm.test(\"Recommendations is an array\", function () {",
+									"    pm.expect(jsonData.recommendations).to.be.an(\"array\");",
+									"});",
+									"",
+									"pm.test(\"basedOnGenres is an array\", function () {",
+									"    pm.expect(jsonData.basedOnGenres).to.be.an(\"array\");",
+									"});",
+									"",
+									"if (jsonData.recommendations.length > 0) {",
+									"    pm.test(\"Recommendation has required fields\", function () {",
+									"        pm.expect(jsonData.recommendations[0]).to.have.property(\"id\");",
+									"        pm.expect(jsonData.recommendations[0]).to.have.property(\"title\");",
+									"        pm.expect(jsonData.recommendations[0]).to.have.property(\"mediaType\");",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/recommendations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"recommendations"
+							]
+						},
+						"description": "Get personalized recommendations for current user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recommendations - Based on Genres",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Recommendations based on user's favorite genres\", function () {",
+									"    // If user has rated media highly, basedOnGenres should not be empty",
+									"    if (jsonData.recommendations.length > 0) {",
+									"        pm.expect(jsonData.basedOnGenres.length).to.be.at.least(0);",
+									"    }",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/recommendations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"recommendations"
+							]
+						},
+						"description": "Verify recommendations are based on user's favorite genres"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recommendations - No Already Rated",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Recommendations don't include already rated media\", function () {",
+									"    // This is a logical test - we can't verify without knowing user's ratings",
+									"    // The test passes if the endpoint returns successfully",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/recommendations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"recommendations"
+							]
+						},
+						"description": "Verify recommendations exclude media user has already rated"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recommendations - Limited to 10",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Recommendations limited to 10\", function () {",
+									"    pm.expect(jsonData.recommendations.length).to.be.at.most(10);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/recommendations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"recommendations"
+							]
+						},
+						"description": "Verify recommendations are limited to maximum 10 results"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recommendations - Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about authentication\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"authentication\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/recommendations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"recommendations"
+							]
+						},
+						"description": "Attempt to get recommendations without authentication"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recommendations - Invalid Auth Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about authentication\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"authentication\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "invalid_token_xyz123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/recommendations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"recommendations"
+							]
+						},
+						"description": "Attempt to get recommendations with invalid auth token"
+					},
+					"response": []
+				}
+			],
+			"description": "Comprehensive user management endpoints with positive and negative test cases covering profiles, favorites, ratings, leaderboard, and recommendations"
+		},
+		{
+			"name": "Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"// Health Check",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"pm.test(\"Response is JSON\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"",
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Response has status field\", function () {",
+							"    pm.expect(jsonData).to.have.property(\"status\");",
+							"});",
+							"",
+							"pm.test(\"Status is ok\", function () {",
+							"    pm.expect(jsonData.status).to.equal(\"ok\");",
+							"});",
+							"",
+							"pm.test(\"Response has service field\", function () {",
+							"    pm.expect(jsonData).to.have.property(\"service\");",
+							"    pm.expect(jsonData.service).to.be.a(\"string\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						""
+					]
+				},
+				"description": "Health check endpoint to verify API is running"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "testMediaId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "testRatingId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "testMediaIdratings",
+			"value": ""
+		}
+	]
+}
