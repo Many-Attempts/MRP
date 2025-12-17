@@ -219,9 +219,208 @@ org.example/
 ## Unit Test Coverage
 
 ### Current Status
-**Dependencies**: JUnit 5 configured in pom.xml
-**Implementation**: No test files currently exist
-**Test Directory**: src/test/java (standard Maven structure)
+**Framework**: JUnit 5 (Jupiter) with Mockito for mocking
+**Total Tests**: 38 unit tests across 6 test classes
+**Test Directory**: `src/test/java/org/example/`
+
+### Test Classes Overview
+
+| Test Class | Tests | Coverage Area |
+|------------|-------|---------------|
+| `AuthHandlerTest.java` | 8 | Password hashing, token extraction, username/password validation |
+| `MediaHandlerTest.java` | 8 | Media type validation, title validation, sort parameter validation |
+| `RatingHandlerTest.java` | 9 | Star validation (1-5), auto-confirmation, comment updates |
+| `UserHandlerTest.java` | 8 | Leaderboard ordering, activity calculation, recommendations |
+| `JsonHelperTest.java` | 3 | JSON parsing, query parameter parsing |
+| `UUIDGeneratorTest.java` | 2 | UUID v7 generation and validation |
+
+### Testing Strategy
+
+**1. Handler Validation Testing**
+- Focus on input validation logic at the handler level
+- Test boundary conditions (e.g., star ratings 0, 1, 5, 6)
+- Validate error handling for invalid inputs
+
+**2. Parameterized Tests**
+- Used for testing multiple input variations efficiently
+- Example: RatingHandlerTest tests various star values with `@ParameterizedTest`
+
+**3. Edge Case Coverage**
+- Empty inputs, null values, boundary values
+- Invalid formats (UUID parsing, JSON parsing)
+- Authorization edge cases
+
+**4. Isolation with Mocking**
+- Mockito used to isolate handler logic from database
+- Enables testing business logic without database dependencies
+
+### Example Test (RatingHandlerTest.java)
+```java
+@ParameterizedTest
+@ValueSource(ints = {1, 2, 3, 4, 5})
+@DisplayName("Valid star ratings should be accepted")
+void testValidStarRatings(int stars) {
+    assertTrue(RatingHandler.isValidStarRating(stars));
+}
+
+@ParameterizedTest
+@ValueSource(ints = {0, -1, 6, 100})
+@DisplayName("Invalid star ratings should be rejected")
+void testInvalidStarRatings(int stars) {
+    assertFalse(RatingHandler.isValidStarRating(stars));
+}
+```
+
+### Running Tests
+```bash
+mvn test
+```
+
+---
+
+## SOLID Principles Implementation
+
+This project demonstrates several SOLID principles in its architecture. Below are concrete examples from the codebase:
+
+### 1. Single Responsibility Principle (SRP)
+
+**Definition**: A class should have only one reason to change.
+
+**Implementation in MRP**:
+
+The project separates concerns into distinct layers, each with a single responsibility:
+
+| Layer | Classes | Single Responsibility |
+|-------|---------|----------------------|
+| Handlers | `AuthHandler`, `MediaHandler`, `RatingHandler`, `UserHandler` | HTTP request/response handling |
+| Services | `AuthService`, `MediaService`, `RatingService`, etc. | Business logic and validation |
+| Repositories | `UserRepository`, `MediaRepository`, `RatingRepository`, etc. | Data access operations |
+| Models | `User`, `MediaEntry`, `Rating` | Data representation |
+
+**Example - RatingService.java**:
+```java
+public class RatingService {
+    private final RatingRepository ratingRepository;
+    private final MediaRepository mediaRepository;
+
+    // Only handles rating business logic
+    public Rating createRating(UUID mediaId, UUID userId, int stars, String comment) {
+        // Validation logic
+        if (ratingRepository.existsByMediaAndUser(mediaId, userId)) {
+            throw new ConflictException("Rating already exists");
+        }
+        // Delegates data access to repository
+        return ratingRepository.create(mediaId, userId, stars, comment);
+    }
+}
+```
+
+The service handles only business logic, while data access is delegated to the repository.
+
+---
+
+### 2. Liskov Substitution Principle (LSP)
+
+**Definition**: Objects of a superclass should be replaceable with objects of its subclasses without affecting correctness.
+
+**Implementation in MRP**:
+
+All handlers implement the `HttpHandler` interface and can be used interchangeably:
+
+**Router.java**:
+```java
+public class Router implements HttpHandler {
+    private final AuthHandler authHandler;
+    private final MediaHandler mediaHandler;
+    private final RatingHandler ratingHandler;
+    private final UserHandler userHandler;
+
+    @Override
+    public void handle(HttpExchange exchange) {
+        String path = exchange.getRequestURI().getPath();
+
+        // Any HttpHandler implementation can be used here
+        if (path.startsWith("/api/auth")) {
+            authHandler.handle(exchange);  // HttpHandler
+        } else if (path.startsWith("/api/media")) {
+            mediaHandler.handle(exchange); // HttpHandler
+        } else if (path.startsWith("/api/ratings")) {
+            ratingHandler.handle(exchange); // HttpHandler
+        }
+        // All handlers are substitutable - LSP in action
+    }
+}
+```
+
+Each handler can be substituted without breaking the router's behavior.
+
+---
+
+### 3. Open/Closed Principle (OCP)
+
+**Definition**: Software entities should be open for extension but closed for modification.
+
+**Implementation in MRP**:
+
+The exception hierarchy allows adding new exception types without modifying existing code:
+
+**Exception Hierarchy**:
+```
+RuntimeException
+├── ValidationException (400 Bad Request)
+├── UnauthorizedException (401 Unauthorized)
+├── NotFoundException (404 Not Found)
+└── ConflictException (409 Conflict)
+```
+
+**Adding a new exception** (extension without modification):
+```java
+// New exception can be added without changing existing handlers
+public class RateLimitException extends RuntimeException {
+    public RateLimitException(String message) {
+        super(message);
+    }
+}
+```
+
+The handlers catch exceptions by type and map them to HTTP status codes, allowing new exceptions to be added without modifying the error handling structure.
+
+---
+
+### 4. Interface Segregation Principle (ISP)
+
+**Definition**: Clients should not be forced to depend on interfaces they don't use.
+
+**Implementation in MRP**:
+
+The `Database` class provides focused methods rather than a monolithic interface:
+
+**Database.java**:
+```java
+public class Database {
+    // Focused query methods - clients use only what they need
+    public <T> List<T> query(String sql, RowMapper<T> mapper, Object... params);
+    public int update(String sql, Object... params);
+    public UUID insert(String sql, Object... params);
+    public boolean exists(String sql, Object... params);
+    public Object getValue(String sql, Object... params);
+}
+```
+
+Repositories use only the methods they need:
+- `UserRepository` uses `query()` and `insert()`
+- `RatingRepository` uses `exists()`, `update()`, and `insert()`
+
+---
+
+### Summary
+
+| Principle | Where Applied | Benefit |
+|-----------|--------------|---------|
+| **SRP** | Handler/Service/Repository layers | Easy to modify one layer without affecting others |
+| **LSP** | HttpHandler implementations | Handlers are interchangeable in Router |
+| **OCP** | Exception hierarchy | Add new exceptions without modifying handlers |
+| **ISP** | Database class methods | Repositories depend only on methods they use |
 
 ---
 
@@ -365,7 +564,93 @@ if (!creatorId.equals(userId)) {
 - Placeholder implementations for future development
 - Clear separation of endpoints by responsibility
 
-**Status**: Routing implemented, business logic pending.
+**Status**: All rating endpoints fully implemented with business logic.
+
+---
+
+## Lessons Learned
+
+### 1. Pure HTTP vs Framework Trade-offs
+
+**Decision**: Use Java's built-in `HttpServer` instead of Spring Boot
+
+**Pros**:
+- Zero external framework dependencies
+- Complete control over request handling
+- Lightweight deployment (smaller JAR)
+- Better understanding of HTTP fundamentals
+
+**Cons**:
+- More manual routing code required
+- No built-in dependency injection
+- Manual JSON serialization/deserialization setup
+
+**Takeaway**: For learning purposes and small APIs, pure HTTP provides valuable low-level understanding. For production applications, frameworks like Spring offer productivity benefits.
+
+---
+
+### 2. Manual JDBC vs ORM
+
+**Decision**: Use raw JDBC with `PreparedStatement` instead of Hibernate/JPA
+
+**Pros**:
+- Full control over SQL queries
+- Better performance optimization opportunities
+- Explicit understanding of database operations
+- No "magic" - what you write is what executes
+
+**Cons**:
+- More boilerplate code (ResultSet mapping)
+- Manual transaction management
+- No automatic schema generation
+
+**Takeaway**: Manual JDBC enforces SQL discipline and provides excellent SQL injection protection through parameterized queries. The trade-off is more verbose code, but the explicitness aids debugging.
+
+---
+
+### 3. Security-First Mindset
+
+**Key Security Implementations**:
+
+| Security Measure | Implementation |
+|-----------------|----------------|
+| Password Hashing | BCrypt with cost factor 12 |
+| SQL Injection Prevention | Parameterized queries (PreparedStatement) |
+| Authorization | Token-based with ownership validation |
+| Input Validation | Handler-level validation before database operations |
+
+**Takeaway**: Security should be built-in from the start, not added later. Using parameterized queries from day one prevents SQL injection without extra effort.
+
+---
+
+### 4. Layered Architecture Benefits
+
+**Structure**:
+```
+Handler → Service → Repository → Database
+```
+
+**Benefits Discovered**:
+- Easy to test each layer in isolation
+- Changes in one layer don't ripple through others
+- Clear separation of HTTP concerns from business logic
+- Repositories can be swapped (e.g., for testing with in-memory data)
+
+**Takeaway**: Investing time in proper architecture pays dividends in maintainability and testability.
+
+---
+
+### 5. UUID v7 for Primary Keys
+
+**Decision**: Use UUID v7 instead of auto-increment integers
+
+**Benefits**:
+- Time-sortable (newer records have "larger" UUIDs)
+- No central coordination needed (good for distributed systems)
+- Prevents ID enumeration attacks
+- No database round-trip needed to generate IDs
+
+**Takeaway**: UUID v7 combines the benefits of UUIDs (global uniqueness) with time-ordering, making it ideal for modern applications.
 
 ---
 
@@ -377,14 +662,15 @@ if (!creatorId.equals(userId)) {
 | Setup (Projekt-Grundgerüst, DB, Docker) | 18 h    |
 | User Authentifizierung                  | 6 h     |
 | Media-Entry CRUD                        | 13 h    |
-| Ratings + Comments + Likes              | 2   h   |
-| Sortieren + Filter                      | 3  h    |
-| Favoriten                               | 3  h    |
-| Empfehlungen                            |         |
-| Leaderboard                             |         |
-| Postman Tests & Debugging               |         |
-| Dokumentation (README & Protocol)       |         |
-| *Gesamt*                              | 45 h    |
+| Ratings + Comments + Likes              | 2 h     |
+| Sortieren + Filter                      | 3 h     |
+| Favoriten                               | 3 h     |
+| Empfehlungen (Recommendations)          | 4 h     |
+| Leaderboard                             | 2 h     |
+| Unit Tests (38 Tests)                   | 5 h     |
+| Postman Tests & Debugging               | 4 h     |
+| Dokumentation (README & Protocol)       | 3 h     |
+| **Gesamt**                              | **63 h**|
 
 
 ---

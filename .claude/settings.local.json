@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(cd:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(dir \"C:\\Users\\etien\\Documents\\FH Projekte\\IntelliJ\\mrp_v3\")"
     ]
   }
 }

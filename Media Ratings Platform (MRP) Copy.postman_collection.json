@@ -1407,6 +1407,182 @@
 					"response": []
 				},
 				{
+					"name": "Get Media List - Min Rating Filter 4.0",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response is array\", function () {",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});",
+									"",
+									"if (jsonData.length > 0) {",
+									"    pm.test(\"All results have average rating >= 4.0\", function () {",
+									"        jsonData.forEach(media => {",
+									"            pm.expect(media.averageRating).to.be.at.least(4.0);",
+									"        });",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media?minRating=4.0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							],
+							"query": [
+								{
+									"key": "minRating",
+									"value": "4.0"
+								}
+							]
+						},
+						"description": "Filter media with minimum average rating of 4.0"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Media List - Min Rating Filter 3.5",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response is array\", function () {",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});",
+									"",
+									"if (jsonData.length > 0) {",
+									"    pm.test(\"All results have average rating >= 3.5\", function () {",
+									"        jsonData.forEach(media => {",
+									"            pm.expect(media.averageRating).to.be.at.least(3.5);",
+									"        });",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media?minRating=3.5",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							],
+							"query": [
+								{
+									"key": "minRating",
+									"value": "3.5"
+								}
+							]
+						},
+						"description": "Filter media with minimum average rating of 3.5"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Media List - Combined Filters with Min Rating",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response is array\", function () {",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});",
+									"",
+									"if (jsonData.length > 0) {",
+									"    pm.test(\"All results match type and rating filters\", function () {",
+									"        jsonData.forEach(media => {",
+									"            pm.expect(media.mediaType).to.equal(\"movie\");",
+									"            pm.expect(media.averageRating).to.be.at.least(3.0);",
+									"        });",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/media?type=movie&minRating=3.0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"media"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "movie"
+								},
+								{
+									"key": "minRating",
+									"value": "3.0"
+								}
+							]
+						},
+						"description": "Filter media by type (movie) and minimum rating (3.0)"
+					},
+					"response": []
+				},
+				{
 					"name": "Create Media - Valid Movie",
 					"event": [
 						{
@@ -4974,6 +5150,17 @@
 									"    pm.expect(jsonData).to.have.property(\"totalRatings\");",
 									"    pm.expect(jsonData).to.have.property(\"totalFavorites\");",
 									"    pm.expect(jsonData).to.have.property(\"totalMediaCreated\");",
+									"    pm.expect(jsonData).to.have.property(\"averageScore\");",
+									"});",
+									"",
+									"pm.test(\"Response has favoriteGenre field (nullable)\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"favoriteGenre\");",
+									"});",
+									"",
+									"pm.test(\"averageScore is a valid number\", function () {",
+									"    pm.expect(jsonData.averageScore).to.be.a(\"number\");",
+									"    pm.expect(jsonData.averageScore).to.be.at.least(0);",
+									"    pm.expect(jsonData.averageScore).to.be.at.most(5);",
 									"});",
 									"",
 									"pm.test(\"Username is testuser1\", function () {",
@@ -5259,6 +5446,302 @@
 					"response": []
 				},
 				{
+					"name": "Edit Profile - Valid Username Change",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has updated username\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"username\");",
+									"});",
+									"",
+									"pm.test(\"Response includes profile statistics\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"totalRatings\");",
+									"    pm.expect(jsonData).to.have.property(\"totalFavorites\");",
+									"    pm.expect(jsonData).to.have.property(\"averageScore\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser1\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser1/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser1",
+								"profile"
+							]
+						},
+						"description": "Edit profile with valid username (keeping same name to not break other tests)"
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Profile - Username Too Short",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about username length\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"username\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"ab\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser1/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser1",
+								"profile"
+							]
+						},
+						"description": "Attempt to edit profile with username less than 3 characters"
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Profile - Empty Username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about empty username\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"username\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser1/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser1",
+								"profile"
+							]
+						},
+						"description": "Attempt to edit profile with empty username"
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Profile - Username Already Taken",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about username taken\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"taken\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser2\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser1/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser1",
+								"profile"
+							]
+						},
+						"description": "Attempt to edit profile with username already taken by another user"
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Profile - Unauthorized (Different User)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message about authorization\", function () {",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include(\"own\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"newname\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/testuser2/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"testuser2",
+								"profile"
+							]
+						},
+						"description": "Attempt to edit another user's profile (should be forbidden)"
+					},
+					"response": []
+				},
+				{
 					"name": "Get Favorites - testuser1 (Has Favorites)",
 					"event": [
 						{
@@ -5537,7 +6020,7 @@
 									"        pm.expect(jsonData[0]).to.have.property(\"mediaTitle\");",
 									"        pm.expect(jsonData[0]).to.have.property(\"stars\");",
 									"        pm.expect(jsonData[0]).to.have.property(\"comment\");",
-									"        pm.expect(jsonData[0]).to.have.property(\"isConfirmed\");",
+									"        pm.expect(jsonData[0]).to.have.property(\"confirmed\");",
 									"        pm.expect(jsonData[0]).to.have.property(\"likeCount\");",
 									"    });",
 									"}"
@@ -5990,12 +6473,25 @@
 									"    pm.expect(jsonData).to.have.property(\"basedOnGenres\");",
 									"});",
 									"",
+									"pm.test(\"Response has content similarity fields\", function () {",
+									"    pm.expect(jsonData).to.have.property(\"basedOnTypes\");",
+									"    pm.expect(jsonData).to.have.property(\"basedOnAgeRestrictions\");",
+									"});",
+									"",
 									"pm.test(\"Recommendations is an array\", function () {",
 									"    pm.expect(jsonData.recommendations).to.be.an(\"array\");",
 									"});",
 									"",
 									"pm.test(\"basedOnGenres is an array\", function () {",
 									"    pm.expect(jsonData.basedOnGenres).to.be.an(\"array\");",
+									"});",
+									"",
+									"pm.test(\"basedOnTypes is an array\", function () {",
+									"    pm.expect(jsonData.basedOnTypes).to.be.an(\"array\");",
+									"});",
+									"",
+									"pm.test(\"basedOnAgeRestrictions is an array\", function () {",
+									"    pm.expect(jsonData.basedOnAgeRestrictions).to.be.an(\"array\");",
 									"});",
 									"",
 									"if (jsonData.recommendations.length > 0) {",

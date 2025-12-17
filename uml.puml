@@ -1,0 +1,388 @@
+@startuml
+class org.example.utils.UUIDGenerator {
++ {static} UUID generateUUIDv7()
++ {static} boolean isValidUUID(String)
++ {static} UUID parseUUID(String)
+}
+
+class org.example.exceptions.NotFoundException {
+}
+class org.example.repositories.MediaRepository {
+- Database db
++ MediaEntry findById(UUID)
++ boolean existsById(UUID)
++ UUID getCreatorId(UUID)
++ List<MediaEntry> findAll(Map<String,String>,String)
++ MediaEntry create(MediaEntry,UUID)
++ int update(MediaEntry)
++ int delete(UUID)
+- MediaEntry mapResultSetToMedia(ResultSet)
+}
+
+
+class org.example.exceptions.ConflictException {
+}
+class org.example.handlers.UserHandler {
+- UserService userService
+- LeaderboardService leaderboardService
+- RecommendationService recommendationService
+- AuthHandler authHandler
++ void handle(HttpExchange)
+- void handleGetProfile(HttpExchange,String)
+- void handleUpdateProfile(HttpExchange,String,UUID)
+- void handleGetUserFavorites(HttpExchange,String)
+- void handleGetUserRatings(HttpExchange,String,UUID)
+- void handleGetLeaderboard(HttpExchange)
+- void handleGetRecommendations(HttpExchange,UUID)
+}
+
+
+class org.example.models.Rating {
+- UUID id
+- UUID mediaId
+- UUID userId
+- int stars
+- String comment
+- boolean isConfirmed
+- Timestamp createdAt
+- String username
+- String mediaTitle
+- int likeCount
+- boolean likedByCurrentUser
++ UUID getId()
++ void setId(UUID)
++ UUID getMediaId()
++ void setMediaId(UUID)
++ UUID getUserId()
++ void setUserId(UUID)
++ int getStars()
++ void setStars(int)
++ String getComment()
++ void setComment(String)
++ boolean isConfirmed()
++ void setConfirmed(boolean)
++ Timestamp getCreatedAt()
++ void setCreatedAt(Timestamp)
++ String getUsername()
++ void setUsername(String)
++ String getMediaTitle()
++ void setMediaTitle(String)
++ int getLikeCount()
++ void setLikeCount(int)
++ boolean isLikedByCurrentUser()
++ void setLikedByCurrentUser(boolean)
+}
+
+
+class org.example.services.UserService {
+- UserRepository userRepository
+- FavoriteRepository favoriteRepository
+- RatingRepository ratingRepository
+- Database db
++ User getUserProfile(String)
+- String calculateFavoriteGenre(UUID)
++ User updateProfile(String,UUID,Map<String,Object>)
++ User getUserById(UUID)
++ List<MediaEntry> getUserFavorites(String)
++ List<Rating> getUserRatings(String,UUID)
+}
+
+
+class org.example.exceptions.ValidationException {
+}
+class org.example.db.Database {
+# {static} String URL
+# {static} String USER
+# {static} String PASSWORD
+# {static} Database instance
+# Connection connection
++ {static} Database getInstance()
+- void connect()
++ Connection getConnection()
++ ResultSet query(String,Object)
++ int update(String,Object)
++ UUID insert(String,Object)
++ void insertWithId(String,Object)
++ boolean exists(String,Object)
++ Object getValue(String,Object)
++ List<Object> getValues(String,Object)
+- PreparedStatement prepareStatement(String,Object)
+- void setParameters(PreparedStatement,Object)
++ void beginTransaction()
++ void commit()
++ void rollback()
++ UUID getUUID(ResultSet,String)
++ UUID getUUID(ResultSet,int)
++ void close()
+}
+
+
+class org.example.exceptions.UnauthorizedException {
+}
+class org.example.models.MediaEntry {
+- UUID id
+- String title
+- String description
+- String mediaType
+- Integer releaseYear
+- String genres
+- String ageRestriction
+- UUID creatorId
+- Timestamp createdAt
+- String creatorUsername
+- double averageRating
+- int totalRatings
+- List<Rating> ratings
++ UUID getId()
++ void setId(UUID)
++ String getTitle()
++ void setTitle(String)
++ String getDescription()
++ void setDescription(String)
++ String getMediaType()
++ void setMediaType(String)
++ Integer getReleaseYear()
++ void setReleaseYear(Integer)
++ String getGenres()
++ void setGenres(String)
++ String getAgeRestriction()
++ void setAgeRestriction(String)
++ UUID getCreatorId()
++ void setCreatorId(UUID)
++ Timestamp getCreatedAt()
++ void setCreatedAt(Timestamp)
++ String getCreatorUsername()
++ void setCreatorUsername(String)
++ double getAverageRating()
++ void setAverageRating(double)
++ int getTotalRatings()
++ void setTotalRatings(int)
++ List<Rating> getRatings()
++ void setRatings(List<Rating>)
+}
+
+
+class org.example.utils.Router {
+- AuthHandler authHandler
+- MediaHandler mediaHandler
+- RatingHandler ratingHandler
+- UserHandler userHandler
++ void handle(HttpExchange)
+}
+
+
+class org.example.services.MediaService {
+- MediaRepository mediaRepository
+- RatingRepository ratingRepository
++ List<MediaEntry> getAllMedia(Map<String,String>,String)
++ MediaEntry getMediaById(UUID,UUID)
++ MediaEntry createMedia(MediaEntry,UUID)
++ MediaEntry updateMedia(UUID,MediaEntry,UUID)
++ void deleteMedia(UUID,UUID)
+- void validateMedia(MediaEntry)
+}
+
+
+class org.example.repositories.AuthTokenRepository {
+- Database db
++ void saveToken(String,UUID)
++ UUID findUserIdByToken(String)
++ void deleteToken(String)
++ void deleteByUserId(UUID)
+}
+
+
+class org.example.Main {
++ {static} void main(String[])
+}
+
+class org.example.repositories.UserRepository {
+- Database db
++ User findById(UUID)
++ User findByUsername(String)
++ boolean existsByUsername(String)
++ User create(String,String)
++ int getTotalRatings(UUID)
++ int getTotalFavorites(UUID)
++ int getTotalMediaCreated(UUID)
++ double getAverageScore(UUID)
++ int updateUsername(UUID,String)
+- User mapResultSetToUser(ResultSet)
+}
+
+
+class org.example.services.AuthService {
+- UserRepository userRepository
+- AuthTokenRepository authTokenRepository
++ Map<String,Object> register(String,String)
++ Map<String,Object> login(String,String)
++ UUID validateToken(String)
++ User getUserFromToken(String)
+}
+
+
+class org.example.handlers.AuthHandler {
+- AuthService authService
++ void handle(HttpExchange)
+- void handleRegister(HttpExchange)
+- void handleLogin(HttpExchange)
++ UUID validateToken(HttpExchange)
++ User getUserFromToken(String)
+}
+
+
+class org.example.repositories.FavoriteRepository {
+- Database db
++ boolean exists(UUID,UUID)
++ void add(UUID,UUID)
++ int remove(UUID,UUID)
++ List<MediaEntry> findByUserId(UUID)
+}
+
+
+class org.example.services.RecommendationService {
+- Database db
++ Map<String,Object> getRecommendations(UUID)
+}
+
+
+class org.example.services.LeaderboardService {
+- Database db
++ List<Map<String,Object>> getLeaderboard()
+}
+
+
+class org.example.handlers.RatingHandler {
+- RatingService ratingService
+- AuthHandler authHandler
++ void handle(HttpExchange)
+- void handleCreateRating(HttpExchange,UUID,UUID)
+- void handleUpdateRating(HttpExchange,UUID,UUID)
+- void handleDeleteRating(HttpExchange,UUID,UUID)
+- void handleConfirmComment(HttpExchange,UUID,UUID)
+- void handleLikeRating(HttpExchange,UUID,UUID)
+- void handleUnlikeRating(HttpExchange,UUID,UUID)
+- UUID parseUUID(HttpExchange,String)
+}
+
+
+class org.example.services.FavoriteService {
+- FavoriteRepository favoriteRepository
+- MediaRepository mediaRepository
++ void addFavorite(UUID,UUID)
++ void removeFavorite(UUID,UUID)
++ List<MediaEntry> getUserFavorites(UUID)
+}
+
+
+class org.example.repositories.RatingRepository {
+- Database db
++ Rating findById(UUID)
++ boolean existsById(UUID)
++ UUID getUserIdByRatingId(UUID)
++ boolean existsByMediaAndUser(UUID,UUID)
++ Rating create(UUID,UUID,int,String,boolean)
++ void updateStarsAndComment(UUID,Integer,String,boolean)
++ void confirmRating(UUID)
++ int delete(UUID)
++ List<Rating> findByMediaId(UUID,UUID)
++ List<Rating> findByUserId(UUID,UUID)
+- Rating mapResultSetToRating(ResultSet)
+}
+
+
+class org.example.models.User {
+- UUID id
+- String username
+- String passwordHash
+- Timestamp createdAt
+- int totalRatings
+- int totalFavorites
+- int totalMediaCreated
+- double averageScore
+- String favoriteGenre
++ UUID getId()
++ String getUsername()
++ String getPasswordHash()
++ Timestamp getCreatedAt()
++ int getTotalRatings()
++ int getTotalFavorites()
++ int getTotalMediaCreated()
++ double getAverageScore()
++ String getFavoriteGenre()
++ void setId(UUID)
++ void setUsername(String)
++ void setPasswordHash(String)
++ void setCreatedAt(Timestamp)
++ void setTotalRatings(int)
++ void setTotalFavorites(int)
++ void setTotalMediaCreated(int)
++ void setAverageScore(double)
++ void setFavoriteGenre(String)
+}
+
+
+class org.example.handlers.MediaHandler {
+- MediaService mediaService
+- FavoriteService favoriteService
+- AuthHandler authHandler
++ void handle(HttpExchange)
+- void handleGetMediaList(HttpExchange,String)
+- void handleGetMedia(HttpExchange,UUID,UUID)
+- void handleCreateMedia(HttpExchange,UUID)
+- void handleUpdateMedia(HttpExchange,UUID,UUID)
+- void handleDeleteMedia(HttpExchange,UUID,UUID)
+- void handleAddFavorite(HttpExchange,UUID,UUID)
+- void handleRemoveFavorite(HttpExchange,UUID,UUID)
+- UUID parseUUID(HttpExchange,String)
+}
+
+
+class org.example.utils.JsonHelper {
+- {static} ObjectMapper mapper
++ {static} T parseRequest(HttpExchange,Class<T>)
++ {static} T parseJson(String,Class<T>)
++ {static} String toJson(Object)
++ {static} void sendResponse(HttpExchange,int,Object)
++ {static} void sendError(HttpExchange,int,String)
++ {static} void sendSuccess(HttpExchange,String)
++ {static} Map<String,String> parseQueryParams(String)
++ {static} String[] getPathSegments(String)
+}
+
+
+class org.example.services.RatingService {
+- RatingRepository ratingRepository
+- MediaRepository mediaRepository
+- RatingLikeRepository ratingLikeRepository
++ Rating createRating(UUID,UUID,Integer,String)
++ void updateRating(UUID,UUID,Integer,String)
++ void deleteRating(UUID,UUID)
++ void confirmRating(UUID,UUID)
++ void likeRating(UUID,UUID)
++ void unlikeRating(UUID,UUID)
+}
+
+
+class org.example.repositories.RatingLikeRepository {
+- Database db
++ boolean exists(UUID,UUID)
++ void add(UUID,UUID)
++ int remove(UUID,UUID)
++ int countByRatingId(UUID)
++ int countByUserId(UUID)
+}
+
+
+
+
+org.example.exceptions.RuntimeException <|-- org.example.exceptions.NotFoundException
+org.example.exceptions.RuntimeException <|-- org.example.exceptions.ConflictException
+com.sun.net.httpserver.HttpHandler <|.. org.example.handlers.UserHandler
+org.example.exceptions.RuntimeException <|-- org.example.exceptions.ValidationException
+org.example.exceptions.RuntimeException <|-- org.example.exceptions.UnauthorizedException
+com.sun.net.httpserver.HttpHandler <|.. org.example.utils.Router
+com.sun.net.httpserver.HttpHandler <|.. org.example.handlers.AuthHandler
+com.sun.net.httpserver.HttpHandler <|.. org.example.handlers.RatingHandler
+com.sun.net.httpserver.HttpHandler <|.. org.example.handlers.MediaHandler
+@enduml

@@ -2,19 +2,23 @@ package org.example.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import org.example.db.Database;
+import org.example.exceptions.ConflictException;
+import org.example.exceptions.NotFoundException;
+import org.example.exceptions.UnauthorizedException;
+import org.example.exceptions.ValidationException;
 import org.example.models.Rating;
+import org.example.services.RatingService;
 import org.example.utils.JsonHelper;
+import org.example.utils.UUIDGenerator;
 
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class RatingHandler implements HttpHandler {
-    private final Database db = Database.getInstance();
+    private final RatingService ratingService = new RatingService();
     private final AuthHandler authHandler = new AuthHandler();
 
     @Override
@@ -34,12 +38,14 @@ public class RatingHandler implements HttpHandler {
 
             // /api/media/{id}/ratings - Create rating
             if (segments.length == 4 && "ratings".equals(segments[3]) && "POST".equals(method)) {
-                String mediaId = segments[2];
+                UUID mediaId = parseUUID(exchange, segments[2]);
+                if (mediaId == null) return;
                 handleCreateRating(exchange, mediaId, userId);
             }
             // /api/ratings/{id} - Update or delete rating
             else if (segments.length == 3 && "ratings".equals(segments[1])) {
-                String ratingId = segments[2];
+                UUID ratingId = parseUUID(exchange, segments[2]);
+                if (ratingId == null) return;
 
                 if ("PUT".equals(method)) {
                     handleUpdateRating(exchange, ratingId, userId);
@@ -51,17 +57,20 @@ public class RatingHandler implements HttpHandler {
             }
             // /api/ratings/{id}/confirm - Confirm comment
             else if (segments.length == 4 && "ratings".equals(segments[1]) && "confirm".equals(segments[3]) && "PUT".equals(method)) {
-                String ratingId = segments[2];
+                UUID ratingId = parseUUID(exchange, segments[2]);
+                if (ratingId == null) return;
                 handleConfirmComment(exchange, ratingId, userId);
             }
             // /api/ratings/{id}/like - Like rating
             else if (segments.length == 4 && "ratings".equals(segments[1]) && "like".equals(segments[3]) && "POST".equals(method)) {
-                String ratingId = segments[2];
+                UUID ratingId = parseUUID(exchange, segments[2]);
+                if (ratingId == null) return;
                 handleLikeRating(exchange, ratingId, userId);
             }
             // /api/ratings/{id}/unlike - Unlike rating
             else if (segments.length == 4 && "ratings".equals(segments[1]) && "unlike".equals(segments[3]) && "DELETE".equals(method)) {
-                String ratingId = segments[2];
+                UUID ratingId = parseUUID(exchange, segments[2]);
+                if (ratingId == null) return;
                 handleUnlikeRating(exchange, ratingId, userId);
             } else {
                 JsonHelper.sendError(exchange, 404, "Endpoint not found");
@@ -72,231 +81,109 @@ public class RatingHandler implements HttpHandler {
         }
     }
 
-    private void handleCreateRating(HttpExchange exchange, String mediaId, UUID userId) throws IOException, SQLException {
-        // Convert mediaId string to UUID
-        UUID mediaUuid;
+    private void handleCreateRating(HttpExchange exchange, UUID mediaId, UUID userId) throws IOException {
         try {
-            mediaUuid = UUID.fromString(mediaId);
-        } catch (IllegalArgumentException e) {
-            JsonHelper.sendError(exchange, 400, "Invalid media ID format");
-            return;
+            Map<String, Object> request = JsonHelper.parseRequest(exchange, HashMap.class);
+            Integer stars = (Integer) request.get("stars");
+            String comment = (String) request.get("comment");
+
+            Rating rating = ratingService.createRating(mediaId, userId, stars, comment);
+            JsonHelper.sendResponse(exchange, 201, rating);
+        } catch (ValidationException e) {
+            JsonHelper.sendError(exchange, 400, e.getMessage());
+        } catch (NotFoundException e) {
+            JsonHelper.sendError(exchange, 404, e.getMessage());
+        } catch (ConflictException e) {
+            JsonHelper.sendError(exchange, 400, e.getMessage());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JsonHelper.sendError(exchange, 500, "Database error");
         }
-
-        // Check if media exists
-        if (!db.exists("SELECT 1 FROM media_entries WHERE id = ?", mediaUuid)) {
-            JsonHelper.sendError(exchange, 404, "Media not found");
-            return;
-        }
-
-        // Check if user already rated this media
-        if (db.exists("SELECT 1 FROM ratings WHERE media_id = ? AND user_id = ?", mediaUuid, userId)) {
-            JsonHelper.sendError(exchange, 400, "You have already rated this media");
-            return;
-        }
-
-        // Parse request
-        Map<String, Object> request = JsonHelper.parseRequest(exchange, HashMap.class);
-        Integer stars = (Integer) request.get("stars");
-        String comment = (String) request.get("comment");
-
-        // Validate stars
-        if (stars == null || stars < 1 || stars > 5) {
-            JsonHelper.sendError(exchange, 400, "Stars must be between 1 and 5");
-            return;
-        }
-
-        // Comments start unconfirmed if present
-        boolean isConfirmed = (comment == null || comment.trim().isEmpty());
-
-        // Insert rating with UUID
-        UUID ratingId = db.insert(
-            "INSERT INTO ratings (id, media_id, user_id, stars, comment, is_confirmed) VALUES (?, ?, ?, ?, ?, ?)",
-            mediaUuid, userId, stars, comment, isConfirmed
-        );
-
-        // Create response
-        Rating rating = new Rating();
-        rating.setId(ratingId);
-        rating.setMediaId(mediaUuid);
-        rating.setUserId(userId);
-        rating.setStars(stars);
-        rating.setComment(comment);
-        rating.setConfirmed(isConfirmed);
-
-        JsonHelper.sendResponse(exchange, 201, rating);
     }
 
-    private void handleUpdateRating(HttpExchange exchange, String ratingId, UUID userId) throws IOException, SQLException {
-        // Validate ratingId
-        if (ratingId == null || ratingId.trim().isEmpty()) {
-            JsonHelper.sendError(exchange, 400, "Rating ID is required");
-            return;
-        }
-
-        // Convert ratingId string to UUID
-        UUID ratingUuid;
+    private void handleUpdateRating(HttpExchange exchange, UUID ratingId, UUID userId) throws IOException {
         try {
-            ratingUuid = UUID.fromString(ratingId);
-        } catch (IllegalArgumentException e) {
-            JsonHelper.sendError(exchange, 400, "Invalid rating ID format");
-            return;
+            Map<String, Object> request = JsonHelper.parseRequest(exchange, HashMap.class);
+            Integer stars = (Integer) request.get("stars");
+            String comment = (String) request.get("comment");
+
+            ratingService.updateRating(ratingId, userId, stars, comment);
+            JsonHelper.sendSuccess(exchange, "Rating updated successfully");
+        } catch (ValidationException e) {
+            JsonHelper.sendError(exchange, 400, e.getMessage());
+        } catch (NotFoundException e) {
+            JsonHelper.sendError(exchange, 404, e.getMessage());
+        } catch (UnauthorizedException e) {
+            JsonHelper.sendError(exchange, 403, e.getMessage());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JsonHelper.sendError(exchange, 500, "Database error");
         }
-
-        // Check if rating exists and belongs to user
-        ResultSet rs = db.query("SELECT user_id, media_id FROM ratings WHERE id = ?", ratingUuid);
-
-        if (!rs.next()) {
-            JsonHelper.sendError(exchange, 404, "Rating not found");
-            return;
-        }
-
-        if (!db.getUUID(rs, "user_id").equals(userId)) {
-            JsonHelper.sendError(exchange, 403, "You can only edit your own ratings");
-            return;
-        }
-
-        // Parse request
-        Map<String, Object> request = JsonHelper.parseRequest(exchange, HashMap.class);
-        Integer stars = (Integer) request.get("stars");
-        String comment = (String) request.get("comment");
-
-        // Validate stars
-        if (stars != null && (stars < 1 || stars > 5)) {
-            JsonHelper.sendError(exchange, 400, "Stars must be between 1 and 5");
-            return;
-        }
-
-        // Update rating - if comment changes, reset confirmation
-        boolean needsConfirmation = comment != null && !comment.trim().isEmpty();
-
-        if (stars != null && comment != null) {
-            db.update(
-                "UPDATE ratings SET stars = ?, comment = ?, is_confirmed = ? WHERE id = ?",
-                stars, comment, !needsConfirmation, ratingUuid
-            );
-        } else if (stars != null) {
-            db.update("UPDATE ratings SET stars = ? WHERE id = ?", stars, ratingUuid);
-        } else if (comment != null) {
-            db.update(
-                "UPDATE ratings SET comment = ?, is_confirmed = ? WHERE id = ?",
-                comment, !needsConfirmation, ratingUuid
-            );
-        }
-
-        JsonHelper.sendSuccess(exchange, "Rating updated successfully");
     }
 
-    private void handleDeleteRating(HttpExchange exchange, String ratingId, UUID userId) throws IOException, SQLException {
-        // Validate ratingId
-        if (ratingId == null || ratingId.trim().isEmpty()) {
-            JsonHelper.sendError(exchange, 400, "Rating ID is required");
-            return;
-        }
-
-        // Convert ratingId string to UUID
-        UUID ratingUuid;
+    private void handleDeleteRating(HttpExchange exchange, UUID ratingId, UUID userId) throws IOException {
         try {
-            ratingUuid = UUID.fromString(ratingId);
-        } catch (IllegalArgumentException e) {
-            JsonHelper.sendError(exchange, 400, "Invalid rating ID format");
-            return;
+            ratingService.deleteRating(ratingId, userId);
+            JsonHelper.sendSuccess(exchange, "Rating deleted successfully");
+        } catch (ValidationException e) {
+            JsonHelper.sendError(exchange, 400, e.getMessage());
+        } catch (NotFoundException e) {
+            JsonHelper.sendError(exchange, 404, e.getMessage());
+        } catch (UnauthorizedException e) {
+            JsonHelper.sendError(exchange, 403, e.getMessage());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JsonHelper.sendError(exchange, 500, "Database error");
         }
-
-        // Check if rating exists and belongs to user
-        Object ratingUserId = db.getValue("SELECT user_id FROM ratings WHERE id = ?", ratingUuid);
-
-        if (ratingUserId == null) {
-            JsonHelper.sendError(exchange, 404, "Rating not found");
-            return;
-        }
-
-        if (!ratingUserId.equals(userId)) {
-            JsonHelper.sendError(exchange, 403, "You can only delete your own ratings");
-            return;
-        }
-
-        // Delete rating
-        db.update("DELETE FROM ratings WHERE id = ?", ratingUuid);
-        JsonHelper.sendSuccess(exchange, "Rating deleted successfully");
     }
 
-    private void handleConfirmComment(HttpExchange exchange, String ratingId, UUID userId) throws IOException, SQLException {
-        // Validate ratingId
-        if (ratingId == null || ratingId.trim().isEmpty()) {
-            JsonHelper.sendError(exchange, 400, "Rating ID is required");
-            return;
-        }
-
-        // Convert ratingId string to UUID
-        UUID ratingUuid;
+    private void handleConfirmComment(HttpExchange exchange, UUID ratingId, UUID userId) throws IOException {
         try {
-            ratingUuid = UUID.fromString(ratingId);
-        } catch (IllegalArgumentException e) {
-            JsonHelper.sendError(exchange, 400, "Invalid rating ID format");
-            return;
+            ratingService.confirmRating(ratingId, userId);
+            JsonHelper.sendSuccess(exchange, "Comment confirmed and now public");
+        } catch (ValidationException e) {
+            JsonHelper.sendError(exchange, 400, e.getMessage());
+        } catch (NotFoundException e) {
+            JsonHelper.sendError(exchange, 404, e.getMessage());
+        } catch (UnauthorizedException e) {
+            JsonHelper.sendError(exchange, 403, e.getMessage());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JsonHelper.sendError(exchange, 500, "Database error");
         }
-
-        // Check if rating exists and belongs to user
-        Object ratingUserId = db.getValue("SELECT user_id FROM ratings WHERE id = ?", ratingUuid);
-
-        if (ratingUserId == null) {
-            JsonHelper.sendError(exchange, 404, "Rating not found");
-            return;
-        }
-
-        if (!ratingUserId.equals(userId)) {
-            JsonHelper.sendError(exchange, 403, "You can only confirm your own comments");
-            return;
-        }
-
-        // Confirm comment
-        db.update("UPDATE ratings SET is_confirmed = true WHERE id = ?", ratingUuid);
-        JsonHelper.sendSuccess(exchange, "Comment confirmed and now public");
     }
 
-    private void handleLikeRating(HttpExchange exchange, String ratingId, UUID userId) throws IOException, SQLException {
-        // Convert ratingId string to UUID
-        UUID ratingUuid;
+    private void handleLikeRating(HttpExchange exchange, UUID ratingId, UUID userId) throws IOException {
         try {
-            ratingUuid = UUID.fromString(ratingId);
-        } catch (IllegalArgumentException e) {
-            JsonHelper.sendError(exchange, 400, "Invalid rating ID format");
-            return;
+            ratingService.likeRating(ratingId, userId);
+            JsonHelper.sendSuccess(exchange, "Rating liked");
+        } catch (NotFoundException e) {
+            JsonHelper.sendError(exchange, 404, e.getMessage());
+        } catch (ConflictException e) {
+            JsonHelper.sendError(exchange, 400, e.getMessage());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JsonHelper.sendError(exchange, 500, "Database error");
         }
-
-        // Check if rating exists
-        if (!db.exists("SELECT 1 FROM ratings WHERE id = ?", ratingUuid)) {
-            JsonHelper.sendError(exchange, 404, "Rating not found");
-            return;
-        }
-
-        // Check if already liked
-        if (db.exists("SELECT 1 FROM rating_likes WHERE rating_id = ? AND user_id = ?", ratingUuid, userId)) {
-            JsonHelper.sendError(exchange, 400, "Already liked this rating");
-            return;
-        }
-
-        // Add like
-        db.update("INSERT INTO rating_likes (rating_id, user_id) VALUES (?, ?)", ratingUuid, userId);
-        JsonHelper.sendSuccess(exchange, "Rating liked");
     }
 
-    private void handleUnlikeRating(HttpExchange exchange, String ratingId, UUID userId) throws IOException, SQLException {
-        // Convert ratingId string to UUID
-        UUID ratingUuid;
+    private void handleUnlikeRating(HttpExchange exchange, UUID ratingId, UUID userId) throws IOException {
         try {
-            ratingUuid = UUID.fromString(ratingId);
-        } catch (IllegalArgumentException e) {
-            JsonHelper.sendError(exchange, 400, "Invalid rating ID format");
-            return;
-        }
-
-        int deleted = db.update("DELETE FROM rating_likes WHERE rating_id = ? AND user_id = ?", ratingUuid, userId);
-
-        if (deleted > 0) {
+            ratingService.unlikeRating(ratingId, userId);
             JsonHelper.sendSuccess(exchange, "Like removed");
-        } else {
-            JsonHelper.sendError(exchange, 404, "Like not found");
+        } catch (NotFoundException e) {
+            JsonHelper.sendError(exchange, 404, e.getMessage());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JsonHelper.sendError(exchange, 500, "Database error");
         }
+    }
+
+    private UUID parseUUID(HttpExchange exchange, String uuidString) throws IOException {
+        if (!UUIDGenerator.isValidUUID(uuidString)) {
+            JsonHelper.sendError(exchange, 400, "Invalid UUID format");
+            return null;
+        }
+        return UUID.fromString(uuidString);
     }
 }

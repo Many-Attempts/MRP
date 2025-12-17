@@ -16,6 +16,8 @@ public class User {
     private int totalRatings;
     private int totalFavorites;
     private int totalMediaCreated;
+    private double averageScore;
+    private String favoriteGenre;
 
     public User() {}
 
@@ -34,6 +36,8 @@ public class User {
     public int getTotalRatings() { return totalRatings; }
     public int getTotalFavorites() { return totalFavorites; }
     public int getTotalMediaCreated() { return totalMediaCreated; }
+    public double getAverageScore() { return averageScore; }
+    public String getFavoriteGenre() { return favoriteGenre; }
 
     // Setters
     public void setId(UUID id) { this.id = id; }
@@ -43,4 +47,6 @@ public class User {
     public void setTotalRatings(int totalRatings) { this.totalRatings = totalRatings; }
     public void setTotalFavorites(int totalFavorites) { this.totalFavorites = totalFavorites; }
     public void setTotalMediaCreated(int totalMediaCreated) { this.totalMediaCreated = totalMediaCreated; }
+    public void setAverageScore(double averageScore) { this.averageScore = averageScore; }
+    public void setFavoriteGenre(String favoriteGenre) { this.favoriteGenre = favoriteGenre; }
 }
