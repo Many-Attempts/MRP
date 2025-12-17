@@ -14,6 +14,7 @@ public class Rating {
 
     // Additional fields for responses
     private String username;
+    private String mediaTitle;
     private int likeCount;
     private boolean likedByCurrentUser;
 
@@ -54,6 +55,9 @@ public class Rating {
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+
+    public String getMediaTitle() { return mediaTitle; }
+    public void setMediaTitle(String mediaTitle) { this.mediaTitle = mediaTitle; }
 
     public int getLikeCount() { return likeCount; }
     public void setLikeCount(int likeCount) { this.likeCount = likeCount; }
