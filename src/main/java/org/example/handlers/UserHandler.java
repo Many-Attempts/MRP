@@ -3,6 +3,7 @@ package org.example.handlers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.example.exceptions.NotFoundException;
+import org.example.models.LeaderboardEntry;
 import org.example.models.MediaEntry;
 import org.example.models.Rating;
 import org.example.models.User;
@@ -135,7 +136,7 @@ public class UserHandler implements HttpHandler {
 
     private void handleGetLeaderboard(HttpExchange exchange) throws IOException {
         try {
-            List<Map<String, Object>> leaderboard = leaderboardService.getLeaderboard();
+            List<LeaderboardEntry> leaderboard = leaderboardService.getLeaderboard();
             JsonHelper.sendResponse(exchange, 200, leaderboard);
         } catch (SQLException e) {
             e.printStackTrace();
