@@ -77,6 +77,33 @@ public class UserRepository {
         );
     }
 
+    public String getFavoriteGenre(UUID userId) throws SQLException {
+        ResultSet rs = db.query(
+            "SELECT m.genres FROM ratings r " +
+            "JOIN media_entries m ON r.media_id = m.id " +
+            "WHERE r.user_id = ? AND m.genres IS NOT NULL",
+            userId
+        );
+
+        java.util.Map<String, Integer> genreCounts = new java.util.HashMap<>();
+        while (rs.next()) {
+            String genres = rs.getString("genres");
+            if (genres != null && !genres.isEmpty()) {
+                for (String genre : genres.split(",")) {
+                    genre = genre.trim().toLowerCase();
+                    if (!genre.isEmpty()) {
+                        genreCounts.merge(genre, 1, Integer::sum);
+                    }
+                }
+            }
+        }
+
+        return genreCounts.entrySet().stream()
+            .max(java.util.Map.Entry.comparingByValue())
+            .map(java.util.Map.Entry::getKey)
+            .orElse(null);
+    }
+
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         User user = new User();
         user.setId(db.getUUID(rs, "id"));

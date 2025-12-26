@@ -1,6 +1,5 @@
 package org.example.services;
 
-import org.example.db.Database;
 import org.example.exceptions.ConflictException;
 import org.example.exceptions.NotFoundException;
 import org.example.exceptions.UnauthorizedException;
@@ -12,9 +11,7 @@ import org.example.repositories.FavoriteRepository;
 import org.example.repositories.RatingRepository;
 import org.example.repositories.UserRepository;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -23,7 +20,6 @@ public class UserService {
     private final UserRepository userRepository = new UserRepository();
     private final FavoriteRepository favoriteRepository = new FavoriteRepository();
     private final RatingRepository ratingRepository = new RatingRepository();
-    private final Database db = Database.getInstance();
 
     public User getUserProfile(String username) throws SQLException {
         User user = userRepository.findByUsername(username);
@@ -37,39 +33,9 @@ public class UserService {
         user.setTotalFavorites(userRepository.getTotalFavorites(user.getId()));
         user.setTotalMediaCreated(userRepository.getTotalMediaCreated(user.getId()));
         user.setAverageScore(userRepository.getAverageScore(user.getId()));
-        user.setFavoriteGenre(calculateFavoriteGenre(user.getId()));
+        user.setFavoriteGenre(userRepository.getFavoriteGenre(user.getId()));
 
         return user;
-    }
-
-    private String calculateFavoriteGenre(UUID userId) throws SQLException {
-        // Get all genres from media the user has rated
-        ResultSet rs = db.query(
-            "SELECT m.genres FROM ratings r " +
-            "JOIN media_entries m ON r.media_id = m.id " +
-            "WHERE r.user_id = ? AND m.genres IS NOT NULL",
-            userId
-        );
-
-        // Count genre occurrences
-        Map<String, Integer> genreCounts = new HashMap<>();
-        while (rs.next()) {
-            String genres = rs.getString("genres");
-            if (genres != null && !genres.isEmpty()) {
-                for (String genre : genres.split(",")) {
-                    genre = genre.trim().toLowerCase();
-                    if (!genre.isEmpty()) {
-                        genreCounts.put(genre, genreCounts.getOrDefault(genre, 0) + 1);
-                    }
-                }
-            }
-        }
-
-        // Find the most common genre
-        return genreCounts.entrySet().stream()
-            .max(Map.Entry.comparingByValue())
-            .map(Map.Entry::getKey)
-            .orElse(null);
     }
 
     public User updateProfile(String username, UUID requesterId, Map<String, Object> updates) throws SQLException {
