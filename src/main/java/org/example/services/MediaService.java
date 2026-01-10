@@ -14,8 +14,18 @@ import java.util.Map;
 import java.util.UUID;
 
 public class MediaService {
-    private final MediaRepository mediaRepository = new MediaRepository();
-    private final RatingRepository ratingRepository = new RatingRepository();
+    private final MediaRepository mediaRepository;
+    private final RatingRepository ratingRepository;
+
+    public MediaService() {
+        this.mediaRepository = new MediaRepository();
+        this.ratingRepository = new RatingRepository();
+    }
+
+    public MediaService(MediaRepository mediaRepository, RatingRepository ratingRepository) {
+        this.mediaRepository = mediaRepository;
+        this.ratingRepository = ratingRepository;
+    }
 
     public List<MediaEntry> getAllMedia(Map<String, String> filters, String sortBy) throws SQLException {
         // Validate year if present

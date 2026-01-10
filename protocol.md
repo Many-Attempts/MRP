@@ -28,7 +28,7 @@ org.example/
 - UUID v7 Tokens in DB gespeichert, ein aktiver Token pro User
 
 ### Geschäftslogik
-- **Kommentar-Bestätigung**: Bewertungen ohne Kommentar werden automatisch bestätigt. Mit Kommentar ist manuelle Bestätigung via `PUT /api/ratings/{id}/confirm` erforderlich
+- **Kommentar-Bestätigung**: Sterne-Bewertungen sind immer öffentlich sichtbar. Kommentare werden erst nach Bestätigung via `PUT /api/ratings/{id}/confirm` angezeigt. Bewertungen ohne Kommentar werden automatisch bestätigt
 - **Empfehlungen**: Basierend auf 4+ Sterne Bewertungen des Users. Matching nach Genre, Medientyp und Altersfreigabe. Liefert max. 10 Medien mit Durchschnittsbewertung ≥ 3.5
 
 ---
@@ -58,45 +58,75 @@ public class RatingService {
 }
 ```
 
-### Liskov Substitution Principle (LSP)
-Alle Handler implementieren `HttpHandler` und sind im Router austauschbar:
+### Dependency Inversion Principle (DIP)
+High-level Module (Services) hängen von Abstraktionen ab, nicht von konkreten Implementierungen:
 
 ```java
-public class Router implements HttpHandler {
-    @Override
-    public void handle(HttpExchange exchange) {
-        String path = exchange.getRequestURI().getPath();
-        if (path.startsWith("/api/auth")) authHandler.handle(exchange);
-        else if (path.startsWith("/api/media")) mediaHandler.handle(exchange);
-        else if (path.startsWith("/api/ratings")) ratingHandler.handle(exchange);
-        // Alle Handler austauschbar - LSP
+public class RatingService {
+    private final RatingRepository ratingRepository;  // Dependency
+
+    // Dependency wird von außen injiziert → testbar mit Mocks
+    public RatingService(RatingRepository ratingRepository) {
+        this.ratingRepository = ratingRepository;
+    }
+
+    public Rating createRating(UUID mediaId, UUID userId, int stars, String comment) {
+        return ratingRepository.create(mediaId, userId, stars, comment);
     }
 }
+
+// In Main.java: Konkrete Implementierung wird injiziert
+RatingRepository ratingRepo = new RatingRepository();
+RatingService ratingService = new RatingService(ratingRepo);
 ```
+
+**Vorteil**: Services können mit Mock-Repositories getestet werden, ohne echte DB-Verbindung.
 
 ---
 
 ## 3. Unit Tests
 
-**Framework**: JUnit 5 + Mockito | **Anzahl Tests**: 42
+**Framework**: JUnit 5 + Mockito 5.14 | **Anzahl Tests**: 44
 
 | Testklasse | Tests | Abdeckung |
 |------------|-------|-----------|
-| AuthHandlerTest | 7 | Passwort-Hashing, Token-Extraktion, Validierung |
-| MediaHandlerTest | 9 | Medientyp, Titel, Sortierparameter-Validierung |
-| RatingHandlerTest | 9 | Sterne-Validierung (1-5), Auto-Bestätigung |
-| UserHandlerTest | 8 | Leaderboard-Sortierung, Empfehlungen |
+| AuthServiceTest | 6 | Registrierung (Validierung, Duplikate), Login (Passwort-Prüfung) |
+| RatingServiceTest | 7 (+5 parametrisiert) | Sterne 1-5, Auto-Bestätigung, Ownership, Duplikate, Likes |
+| MediaServiceTest | 5 (+4 parametrisiert) | Titel/Typ-Validierung, Creator-Only Edit/Delete |
+| UserServiceTest | 4 | Profil-Ownership, Username-Konflikte, Not-Found |
+| FavoriteServiceTest | 3 | Media-Not-Found, Duplikate, Remove-Not-Found |
 | JsonHelperTest | 6 | JSON/Query-Parameter Parsing |
-| UUIDGeneratorTest | 3 | UUID v7 Generierung |
+| UUIDGeneratorTest | 3 | UUID v7 Generierung und Validierung |
 
 ### Teststrategie
-- **Parametrisierte Tests**: Effizientes Testen mehrerer Eingabevarianten (z.B. Sterne 0-6)
-- **Grenzwert-Tests**: Edge Cases bei Validierung (leere Eingaben, Null-Werte)
-- **Isolation**: Mockito mockt Datenbankabhängigkeiten
-- **Fokus auf Geschäftslogik**: Validierung auf Handler-Ebene
+- **Constructor Injection**: Services erhalten Repository-Dependencies via Konstruktor für Testbarkeit
+- **Mockito Mocks**: Repositories werden gemockt, um Service-Logik isoliert zu testen
+- **Echte Service-Tests**: Tests prüfen die tatsächliche Produktions-Implementierung, keine duplizierten Helper-Methoden
+- **Parametrisierte Tests**: `@ParameterizedTest` für effizientes Testen mehrerer Eingabevarianten
 
 ### Warum diese Tests?
-Getestet wird primär die **Eingabevalidierung**, da fehlerhafte Benutzereingaben die häufigste Fehlerquelle sind. Sterne-Bewertungen (1-5), Username-Format und UUID-Parsing werden validiert bevor sie die Datenbank erreichen - das verhindert inkonsistente Daten und unklare SQL-Fehler.
+
+**Priorisierung nach Risiko und Geschäftswert:**
+
+| Priorität | Bereich | Begründung |
+|-----------|---------|------------|
+| **Kritisch** | AuthService | Sicherheitsrelevant: Falsche Validierung ermöglicht unbefugten Zugriff. Username (3-50 Zeichen) und Passwort (min. 6 Zeichen) müssen vor DB-Speicherung validiert werden. |
+| **Kritisch** | RatingService | Kernfunktionalität: Doppelte Bewertungen verhindern, Sterne-Bereich (1-5) erzwingen, Ownership bei Edit/Delete prüfen. Auto-Confirm-Logik für Kommentare. |
+| **Hoch** | MediaService | Datenintegrität: Nur gültige Medientypen (movie/series/game) erlauben. Creator-Only-Berechtigungen verhindern unbefugte Änderungen. |
+| **Hoch** | UserService | Benutzerdaten: Username-Eindeutigkeit bei Änderungen, Profil-Ownership, Längenvalidierung. |
+| **Mittel** | FavoriteService | Duplikat-Vermeidung, Existenzprüfungen für Media und Favorites. |
+
+**Warum Service-Layer testen (nicht Handler)?**
+- Services enthalten die **Geschäftslogik** - hier passieren die wichtigen Entscheidungen
+- Handler sind nur HTTP-Wrapper - bereits durch Postman-Integration-Tests abgedeckt
+- Mit Mockito können Repository-Abhängigkeiten isoliert werden → schnelle, deterministische Tests
+
+**Warum diese Exception-Tests?**
+Jede Exception repräsentiert einen **Geschäftsregel-Verstoß**:
+- `ValidationException`: Ungültige Eingabedaten (z.B. Sterne < 1 oder > 5)
+- `ConflictException`: Duplikate verhindern (bereits bewertet, Username vergeben)
+- `UnauthorizedException`: Ownership-Verletzung (fremde Bewertung bearbeiten)
+- `NotFoundException`: Referenzielle Integrität (Media existiert nicht)
 
 ### Integration Tests
 Postman Collection für alle Endpoints: Auth, Media CRUD, Ratings, Favorites, Leaderboard, Recommendations.
@@ -115,9 +145,11 @@ Postman Collection für alle Endpoints: Auth, Media CRUD, Ratings, Favorites, Le
 
 | Problem | Lösung |
 |---------|--------|
-| Ungültiges JSON verursachte 500-Fehler | Try-catch für `JsonParseException`, return 400 mit klarer Fehlermeldung |
-| UUID als String war fehleranfällig | Native `UUID` Typ + `parseUUID()` Validierung vor DB-Zugriff |
-| Statische Methoden erschwerten Testing | Refactoring zu Singleton Pattern für Database-Klasse |
+| `NullPointerException` beim Lesen von Request-Body | `InputStream` mit `BufferedReader` vollständig lesen, auf `null` prüfen bevor `ObjectMapper.readValue()` |
+| SQL-Fehler "column not found" bei INSERT | Spaltennamen in SQL genau mit Datenbank-Schema abgleichen (`snake_case` vs `camelCase`) |
+| `Connection refused` bei PostgreSQL | Docker-Container Status prüfen mit `docker ps`, Port 5432 in `docker-compose.yml` verifizieren |
+| 405 Method Not Allowed obwohl Handler existiert | Request-Methode im Handler prüfen: `exchange.getRequestMethod().equals("POST")` |
+| Token wird nicht erkannt nach Login | Authorization Header mit "Bearer " Prefix senden: `Bearer <token>` |
 
 ---
 
@@ -125,21 +157,18 @@ Postman Collection für alle Endpoints: Auth, Media CRUD, Ratings, Favorites, Le
 
 | Aufgabe | Stunden |
 |---------|---------|
-| Setup (Projekt, DB, Docker) | 18 |
-| User Authentifizierung | 6 |
-| Media-Entry CRUD | 13 |
-| Ratings + Comments + Likes | 2 |
-| Sortieren + Filter | 3 |
-| Favoriten | 3 |
-| Empfehlungen | 4 |
-| Leaderboard | 2 |
-| Unit Tests (38) | 5 |
-| Postman Tests & Debugging | 4 |
-| Dokumentation | 3 |
-| **Gesamt** | **63** |
+| Setup (Projekt, DB, Docker) | 6 |
+| Architektur-Design & Planung | 4 |
+| User Authentifizierung (inkl. BCrypt, Token) | 12 |
+| Media-Entry CRUD | 10 |
+| Ratings + Comments + Likes | 14 |
+| Sortieren + Filter | 6 |
+| Favoriten | 5 |
+| Empfehlungen-Algorithmus | 8 |
+| Leaderboard | 4 |
+| Unit Tests (44) | 12 |
+| Postman Tests & Debugging | 6 |
+| Dokumentation & Protokoll | 3 |
+| **Gesamt** | **90** |
 
 ---
-
-## 7. Git Repository
-
-[GIT_LINK]

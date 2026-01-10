@@ -48,6 +48,14 @@ public class Main {
             System.out.println("  POST   /api/ratings/{id}/like        - Like a rating");
             System.out.println("  DELETE /api/ratings/{id}/unlike      - Unlike a rating");
             System.out.println("");
+            System.out.println("Users:");
+            System.out.println("  GET    /api/users/{username}/profile   - Get user profile");
+            System.out.println("  PUT    /api/users/{username}/profile   - Update user profile");
+            System.out.println("  GET    /api/users/{username}/favorites - Get user's favorite media");
+            System.out.println("  GET    /api/users/{username}/ratings   - Get user's ratings");
+            System.out.println("  GET    /api/leaderboard                - Get leaderboard");
+            System.out.println("  GET    /api/recommendations            - Get recommendations");
+            System.out.println("");
             System.out.println("Database: PostgreSQL on localhost:5433");
             System.out.println("Press Ctrl+C to stop the server");
             System.out.println("===========================================");

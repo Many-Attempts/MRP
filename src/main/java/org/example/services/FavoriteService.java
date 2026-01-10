@@ -11,8 +11,18 @@ import java.util.List;
 import java.util.UUID;
 
 public class FavoriteService {
-    private final FavoriteRepository favoriteRepository = new FavoriteRepository();
-    private final MediaRepository mediaRepository = new MediaRepository();
+    private final FavoriteRepository favoriteRepository;
+    private final MediaRepository mediaRepository;
+
+    public FavoriteService() {
+        this.favoriteRepository = new FavoriteRepository();
+        this.mediaRepository = new MediaRepository();
+    }
+
+    public FavoriteService(FavoriteRepository favoriteRepository, MediaRepository mediaRepository) {
+        this.favoriteRepository = favoriteRepository;
+        this.mediaRepository = mediaRepository;
+    }
 
     public void addFavorite(UUID userId, UUID mediaId) throws SQLException {
         // Check if media exists
