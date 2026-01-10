@@ -7,6 +7,20 @@ class org.example.utils.UUIDGenerator {
 
 class org.example.exceptions.NotFoundException {
 }
+class org.example.models.UserPreferences {
+- List<String> genres
+- List<String> mediaTypes
+- List<String> ageRestrictions
++ List<String> getGenres()
++ void setGenres(List<String>)
++ List<String> getMediaTypes()
++ void setMediaTypes(List<String>)
++ List<String> getAgeRestrictions()
++ void setAgeRestrictions(List<String>)
++ boolean isEmpty()
+}
+
+
 class org.example.repositories.MediaRepository {
 - Database db
 + MediaEntry findById(UUID)
@@ -22,6 +36,15 @@ class org.example.repositories.MediaRepository {
 
 class org.example.exceptions.ConflictException {
 }
+class org.example.repositories.RecommendationRepository {
+- Database db
++ UserPreferences findUserPreferences(UUID,int,int,int)
++ List<MediaEntry> findRecommendedMedia(UUID,List<String>,List<String>,List<String>,double,int)
+- List<String> getTopN(Map<String,Integer>,int)
+- MediaEntry mapResultSetToMedia(ResultSet)
+}
+
+
 class org.example.handlers.UserHandler {
 - UserService userService
 - LeaderboardService leaderboardService
@@ -78,9 +101,7 @@ class org.example.services.UserService {
 - UserRepository userRepository
 - FavoriteRepository favoriteRepository
 - RatingRepository ratingRepository
-- Database db
 + User getUserProfile(String)
-- String calculateFavoriteGenre(UUID)
 + User updateProfile(String,UUID,Map<String,Object>)
 + User getUserById(UUID)
 + List<MediaEntry> getUserFavorites(String)
@@ -207,7 +228,30 @@ class org.example.repositories.UserRepository {
 + int getTotalMediaCreated(UUID)
 + double getAverageScore(UUID)
 + int updateUsername(UUID,String)
++ String getFavoriteGenre(UUID)
 - User mapResultSetToUser(ResultSet)
+}
+
+
+class org.example.models.LeaderboardEntry {
+- int rank
+- String username
+- int ratingCount
+- int mediaCreated
+- int likesGiven
+- int totalActivity
++ int getRank()
++ void setRank(int)
++ String getUsername()
++ void setUsername(String)
++ int getRatingCount()
++ void setRatingCount(int)
++ int getMediaCreated()
++ void setMediaCreated(int)
++ int getLikesGiven()
++ void setLikesGiven(int)
++ int getTotalActivity()
++ void setTotalActivity(int)
 }
 
 
@@ -231,6 +275,13 @@ class org.example.handlers.AuthHandler {
 }
 
 
+class org.example.repositories.LeaderboardRepository {
+- Database db
++ List<LeaderboardEntry> findTopUsersByActivity(int)
+- LeaderboardEntry mapResultSetToLeaderboardEntry(ResultSet)
+}
+
+
 class org.example.repositories.FavoriteRepository {
 - Database db
 + boolean exists(UUID,UUID)
@@ -241,14 +292,20 @@ class org.example.repositories.FavoriteRepository {
 
 
 class org.example.services.RecommendationService {
-- Database db
+- RecommendationRepository recommendationRepository
+- {static} int TOP_GENRES_COUNT
+- {static} int TOP_TYPES_COUNT
+- {static} int TOP_AGES_COUNT
+- {static} double MIN_RATING_THRESHOLD
+- {static} int RECOMMENDATION_LIMIT
 + Map<String,Object> getRecommendations(UUID)
 }
 
 
 class org.example.services.LeaderboardService {
-- Database db
-+ List<Map<String,Object>> getLeaderboard()
+- LeaderboardRepository leaderboardRepository
+- {static} int LEADERBOARD_LIMIT
++ List<LeaderboardEntry> getLeaderboard()
 }
 
 
