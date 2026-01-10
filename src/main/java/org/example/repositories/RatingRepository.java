@@ -69,14 +69,16 @@ public class RatingRepository {
 
     public List<Rating> findByMediaId(UUID mediaId, UUID currentUserId) throws SQLException {
         ResultSet rs = db.query(
-            "SELECT r.*, u.username, " +
+            "SELECT r.id, r.media_id, r.user_id, r.stars, " +
+            "CASE WHEN r.is_confirmed = true OR r.user_id = ? THEN r.comment ELSE NULL END as comment, " +
+            "r.is_confirmed, r.created_at, u.username, " +
             "(SELECT COUNT(*) FROM rating_likes WHERE rating_id = r.id) as like_count, " +
             "EXISTS(SELECT 1 FROM rating_likes WHERE rating_id = r.id AND user_id = ?) as liked_by_user " +
             "FROM ratings r " +
             "JOIN users u ON r.user_id = u.id " +
-            "WHERE r.media_id = ? AND (r.is_confirmed = true OR r.user_id = ?) " +
+            "WHERE r.media_id = ? " +
             "ORDER BY r.created_at DESC",
-            currentUserId, mediaId, currentUserId
+            currentUserId, currentUserId, mediaId
         );
 
         List<Rating> ratings = new ArrayList<>();
@@ -92,13 +94,15 @@ public class RatingRepository {
 
     public List<Rating> findByUserId(UUID userId, UUID requesterId) throws SQLException {
         ResultSet rs = db.query(
-            "SELECT r.*, m.title as media_title, " +
+            "SELECT r.id, r.media_id, r.user_id, r.stars, " +
+            "CASE WHEN r.is_confirmed = true OR r.user_id = ? THEN r.comment ELSE NULL END as comment, " +
+            "r.is_confirmed, r.created_at, m.title as media_title, " +
             "(SELECT COUNT(*) FROM rating_likes WHERE rating_id = r.id) as like_count " +
             "FROM ratings r " +
             "JOIN media_entries m ON r.media_id = m.id " +
-            "WHERE r.user_id = ? AND (r.is_confirmed = true OR r.user_id = ?) " +
+            "WHERE r.user_id = ? " +
             "ORDER BY r.created_at DESC",
-            userId, requesterId
+            requesterId, userId
         );
 
         List<Rating> ratings = new ArrayList<>();

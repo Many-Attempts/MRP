@@ -17,9 +17,21 @@ import java.util.Map;
 import java.util.UUID;
 
 public class UserService {
-    private final UserRepository userRepository = new UserRepository();
-    private final FavoriteRepository favoriteRepository = new FavoriteRepository();
-    private final RatingRepository ratingRepository = new RatingRepository();
+    private final UserRepository userRepository;
+    private final FavoriteRepository favoriteRepository;
+    private final RatingRepository ratingRepository;
+
+    public UserService() {
+        this.userRepository = new UserRepository();
+        this.favoriteRepository = new FavoriteRepository();
+        this.ratingRepository = new RatingRepository();
+    }
+
+    public UserService(UserRepository userRepository, FavoriteRepository favoriteRepository, RatingRepository ratingRepository) {
+        this.userRepository = userRepository;
+        this.favoriteRepository = favoriteRepository;
+        this.ratingRepository = ratingRepository;
+    }
 
     public User getUserProfile(String username) throws SQLException {
         User user = userRepository.findByUsername(username);

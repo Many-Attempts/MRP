@@ -13,9 +13,21 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class RatingService {
-    private final RatingRepository ratingRepository = new RatingRepository();
-    private final MediaRepository mediaRepository = new MediaRepository();
-    private final RatingLikeRepository ratingLikeRepository = new RatingLikeRepository();
+    private final RatingRepository ratingRepository;
+    private final MediaRepository mediaRepository;
+    private final RatingLikeRepository ratingLikeRepository;
+
+    public RatingService() {
+        this.ratingRepository = new RatingRepository();
+        this.mediaRepository = new MediaRepository();
+        this.ratingLikeRepository = new RatingLikeRepository();
+    }
+
+    public RatingService(RatingRepository ratingRepository, MediaRepository mediaRepository, RatingLikeRepository ratingLikeRepository) {
+        this.ratingRepository = ratingRepository;
+        this.mediaRepository = mediaRepository;
+        this.ratingLikeRepository = ratingLikeRepository;
+    }
 
     public Rating createRating(UUID mediaId, UUID userId, Integer stars, String comment) throws SQLException {
         // Check if media exists

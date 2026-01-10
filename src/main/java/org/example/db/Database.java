@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class Database {
-    protected static final String URL = "jdbc:postgresql://localhost:5433/mrp_db";
+    protected static final String URL = "jdbc:postgresql://localhost:5434/mrp_db";
     protected static final String USER = "postgres";
     protected static final String PASSWORD = "postgres";
 
@@ -165,7 +165,6 @@ public class Database {
     }
 
     // Closes the database connection cleanly
-    // Always call this when your application shuts down to free resources
     public void close() {
         try {
             if (connection != null && !connection.isClosed()) {

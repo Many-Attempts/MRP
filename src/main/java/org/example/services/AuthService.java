@@ -15,8 +15,18 @@ import java.util.Map;
 import java.util.UUID;
 
 public class AuthService {
-    private final UserRepository userRepository = new UserRepository();
-    private final AuthTokenRepository authTokenRepository = new AuthTokenRepository();
+    private final UserRepository userRepository;
+    private final AuthTokenRepository authTokenRepository;
+
+    public AuthService() {
+        this.userRepository = new UserRepository();
+        this.authTokenRepository = new AuthTokenRepository();
+    }
+
+    public AuthService(UserRepository userRepository, AuthTokenRepository authTokenRepository) {
+        this.userRepository = userRepository;
+        this.authTokenRepository = authTokenRepository;
+    }
 
     public Map<String, Object> register(String username, String password) throws SQLException {
         // Validation
