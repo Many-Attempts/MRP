@@ -86,17 +86,17 @@ RatingService ratingService = new RatingService(ratingRepo);
 
 ## 3. Unit Tests
 
-**Framework**: JUnit 5 + Mockito 5.14 | **Anzahl Tests**: 44
+**Framework**: JUnit 5 + Mockito 5.14 
 
-| Testklasse | Tests | Abdeckung |
-|------------|-------|-----------|
-| AuthServiceTest | 6 | Registrierung (Validierung, Duplikate), Login (Passwort-Prüfung) |
-| RatingServiceTest | 7 (+5 parametrisiert) | Sterne 1-5, Auto-Bestätigung, Ownership, Duplikate, Likes |
-| MediaServiceTest | 5 (+4 parametrisiert) | Titel/Typ-Validierung, Creator-Only Edit/Delete |
-| UserServiceTest | 4 | Profil-Ownership, Username-Konflikte, Not-Found |
-| FavoriteServiceTest | 3 | Media-Not-Found, Duplikate, Remove-Not-Found |
-| JsonHelperTest | 6 | JSON/Query-Parameter Parsing |
-| UUIDGeneratorTest | 3 | UUID v7 Generierung und Validierung |
+| Testklasse | Abdeckung |
+|------------|-----------|
+| AuthServiceTest | Registrierung (Validierung, Duplikate), Login (Passwort-Prüfung) |
+| RatingServiceTest | Sterne 1-5, Auto-Bestätigung, Ownership, Duplikate, Likes |
+| MediaServiceTest | Titel/Typ-Validierung, Creator-Only Edit/Delete |
+| UserServiceTest | Profil-Ownership, Username-Konflikte, Not-Found |
+| FavoriteServiceTest | Media-Not-Found, Duplikate, Remove-Not-Found |
+| JsonHelperTest | JSON/Query-Parameter Parsing |
+| UUIDGeneratorTest | UUID v7 Generierung und Validierung |
 
 ### Teststrategie
 - **Constructor Injection**: Services erhalten Repository-Dependencies via Konstruktor für Testbarkeit
