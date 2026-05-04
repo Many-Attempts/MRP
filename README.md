@@ -3,6 +3,7 @@
 A REST backend for media ratings and reviews — built in Java 17 on `com.sun.net.httpserver.HttpServer`, backed by PostgreSQL 16, deployed to Azure App Service for Containers via Azure Pipelines.
 
 > See [`PROJECT_SUMMARY.md`](PROJECT_SUMMARY.md) for the one-pager (purpose, members, architecture).
+> See [`docs/project-overview.md`](docs/project-overview.md) for the full technical writeup — every design decision, alternatives ruled out, commands explained, and post-mortem of issues hit.
 > See [`docs/azure-setup.md`](docs/azure-setup.md) for the one-time Azure + DevOps bootstrap.
 
 ## Quick start (local development)
