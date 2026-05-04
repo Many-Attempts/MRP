@@ -99,9 +99,9 @@ foreach ($app in @($AppStaging, $AppProd)) {
     az role assignment create --role "Key Vault Secrets User" --assignee $appMi --scope $KvId | Out-Null
     az role assignment create --role "AcrPull"                --assignee $appMi --scope $AcrId | Out-Null
 
-    $kvUrl   = "@Microsoft.KeyVault(VaultName=$Kv;SecretName=DB-URL)"
-    $kvUser  = "@Microsoft.KeyVault(VaultName=$Kv;SecretName=DB-USER)"
-    $kvPass  = "@Microsoft.KeyVault(VaultName=$Kv;SecretName=DB-PASSWORD)"
+    $kvUrl  = '@Microsoft.KeyVault(VaultName=' + $Kv + ';SecretName=DB-URL)'
+    $kvUser = '@Microsoft.KeyVault(VaultName=' + $Kv + ';SecretName=DB-USER)'
+    $kvPass = '@Microsoft.KeyVault(VaultName=' + $Kv + ';SecretName=DB-PASSWORD)'
 
     az webapp config appsettings set -g $ResourceGroup -n $app --settings `
         "DB_URL=$kvUrl" `

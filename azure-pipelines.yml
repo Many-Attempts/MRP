@@ -24,13 +24,13 @@ pr:
       - master
 
 variables:
-  # ---- Edit these to match the names produced by docs/azure-setup.md ----
-  acrName: 'acrmrpREPLACE'                  # e.g. acrmrp42 (no .azurecr.io suffix)
+  # ---- Wired to bootstrap output (suffix 38215, region switzerlandnorth) ----
+  acrName: 'acrmrp38215'                    # ACR (no .azurecr.io suffix)
   acrServiceConnection: 'sc-acr'            # name of the ACR Docker Registry service connection
   azureSubscription: 'sc-azure-rm'          # name of the Azure RM service connection (workload identity)
   resourceGroup: 'rg-mrp-dev'
-  appNameStaging: 'app-mrp-stagingREPLACE'
-  appNameProd: 'app-mrp-prodREPLACE'
+  appNameStaging: 'app-mrp-staging-38215'
+  appNameProd: 'app-mrp-prod-38215'
   # -----------------------------------------------------------------------
   imageRepo: 'mrp'
   imageTag: '$(Build.BuildId)'
