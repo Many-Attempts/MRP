@@ -34,8 +34,6 @@ variables:
   # -----------------------------------------------------------------------
   imageRepo: 'mrp'
   imageTag: '$(Build.BuildId)'
-  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
-  MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
 
 stages:
   # ============================================================
@@ -49,15 +47,6 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
-          - task: Cache@2
-            displayName: 'Cache Maven local repo'
-            inputs:
-              key: 'maven | "$(Agent.OS)" | **/pom.xml'
-              restoreKeys: |
-                maven | "$(Agent.OS)"
-                maven
-              path: $(MAVEN_CACHE_FOLDER)
-
           - task: Maven@4
             displayName: 'mvn clean package (runs unit tests)'
             inputs:
