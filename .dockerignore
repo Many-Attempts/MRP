@@ -1,0 +1,16 @@
+target/
+.git/
+.gitignore
+.idea/
+*.iml
+.env
+.env.*
+!.env.example
+*.md
+docs/
+.azuredevops/
+*.xlsx
+*.zip
+*.pdf
+*.postman_collection.json
+*.puml

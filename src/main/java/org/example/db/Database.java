@@ -8,12 +8,19 @@ import java.util.List;
 import java.util.UUID;
 
 public class Database {
-    protected static final String URL = "jdbc:postgresql://localhost:5434/mrp_db";
-    protected static final String USER = "postgres";
-    protected static final String PASSWORD = "postgres";
-
     protected static Database instance;
     protected Connection connection;
+
+    private static String requireEnv(String name) {
+        String value = System.getenv(name);
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(
+                "Required environment variable " + name + " is not set. " +
+                "Set it via your shell, .env file, or container/App Service configuration."
+            );
+        }
+        return value;
+    }
 
     protected Database() {
         connect();
@@ -27,8 +34,11 @@ public class Database {
     }
 
     private void connect() {
+        String url = requireEnv("DB_URL");
+        String user = requireEnv("DB_USER");
+        String password = requireEnv("DB_PASSWORD");
         try {
-            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            connection = DriverManager.getConnection(url, user, password);
             System.out.println("Connected to PostgreSQL database!");
         } catch (SQLException e) {
             System.err.println("Connection failed: " + e.getMessage());

@@ -56,7 +56,7 @@ public class Main {
             System.out.println("  GET    /api/leaderboard                - Get leaderboard");
             System.out.println("  GET    /api/recommendations            - Get recommendations");
             System.out.println("");
-            System.out.println("Database: PostgreSQL on localhost:5433");
+            System.out.println("Database: PostgreSQL (configured via DB_URL env var)");
             System.out.println("Press Ctrl+C to stop the server");
             System.out.println("===========================================");
 
