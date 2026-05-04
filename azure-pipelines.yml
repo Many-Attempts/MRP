@@ -1,0 +1,172 @@
+# MRP — Azure DevOps multi-stage pipeline
+# Build → Deploy_Staging → Deploy_Production
+#
+# Prerequisites (one-time setup, see docs/azure-setup.md):
+#   - Service connection (Azure Resource Manager, Workload Identity Federation): $(azureSubscription)
+#     (this single connection is used for both ACR push and App Service deploy)
+#   - Two Azure Web Apps for Containers: $(appNameStaging) and $(appNameProd)
+#   - Two Azure DevOps environments: 'staging' (no approval) and 'production' (manual approval)
+#   - DB credentials live ONLY in Azure Key Vault — App Service pulls them at runtime via managed identity.
+#     They never appear here, in variable groups, or in pipeline logs.
+
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - '**/*.md'
+      - 'docs/**'
+
+pr:
+  branches:
+    include:
+      - master
+
+variables:
+  # ---- Wired to bootstrap output (suffix 38215, region switzerlandnorth) ----
+  acrName: 'acrmrp38215'                    # ACR name only (no .azurecr.io suffix)
+  azureSubscription: 'sc-azure-rm'          # AzureRM service connection (Workload Identity Federation)
+  resourceGroup: 'rg-mrp-dev'
+  appNameStaging: 'app-mrp-staging-38215'
+  appNameProd: 'app-mrp-prod-38215'
+  # The ACR push uses az acr login over sc-azure-rm — no separate Docker Registry connection needed.
+  # -----------------------------------------------------------------------
+  imageRepo: 'mrp'
+  imageTag: '$(Build.BuildId)'
+
+stages:
+  # ============================================================
+  # Stage 1: Build (Maven test + package, Docker build + push)
+  # ============================================================
+  - stage: Build
+    displayName: 'Build & Push Image'
+    jobs:
+      - job: BuildAndPush
+        displayName: 'Maven build, test, containerize'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: Maven@4
+            displayName: 'mvn clean package (runs unit tests)'
+            inputs:
+              mavenPomFile: 'pom.xml'
+              goals: 'clean package'
+              options: '-B'
+              publishJUnitResults: true
+              testResultsFiles: '**/surefire-reports/TEST-*.xml'
+              testRunTitle: 'MRP unit tests'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '1.17'
+              mavenVersionOption: 'Default'
+              mavenAuthenticateFeed: false
+              effectivePomSkip: false
+
+          # Authenticate Docker to ACR using the AzureRM service connection.
+          # The workload-identity SP behind sc-azure-rm gets a short-lived ACR token —
+          # no credentials stored in the pipeline or in a separate Docker registry connection.
+          - task: AzureCLI@2
+            displayName: 'docker login to ACR via Azure RM'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -euo pipefail
+                az acr login --name $(acrName)
+
+          - script: |
+              set -euo pipefail
+              IMAGE=$(acrName).azurecr.io/$(imageRepo)
+              docker build -t $IMAGE:$(imageTag) -t $IMAGE:latest -f Dockerfile .
+              docker push $IMAGE:$(imageTag)
+              docker push $IMAGE:latest
+            displayName: 'Build & push image to ACR'
+
+          - publish: $(Build.SourcesDirectory)/azure-pipelines.yml
+            artifact: pipeline-manifest
+            displayName: 'Publish pipeline manifest (audit trail)'
+
+  # ============================================================
+  # Stage 2: Deploy to Staging (auto)
+  # ============================================================
+  - stage: Deploy_Staging
+    displayName: 'Deploy → Staging'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    jobs:
+      - deployment: DeployStaging
+        displayName: 'Deploy container to staging Web App'
+        environment: 'staging'
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureWebAppContainer@1
+                  displayName: 'Deploy image to App Service (staging)'
+                  inputs:
+                    azureSubscription: '$(azureSubscription)'
+                    appName: '$(appNameStaging)'
+                    imageName: '$(acrName).azurecr.io/$(imageRepo):$(imageTag)'
+
+                - task: AzureCLI@2
+                  displayName: 'Smoke-check: GET / on staging'
+                  inputs:
+                    azureSubscription: '$(azureSubscription)'
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      set -euo pipefail
+                      URL="https://$(appNameStaging).azurewebsites.net/"
+                      echo "Probing $URL ..."
+                      for i in 1 2 3 4 5 6; do
+                        if curl -fsS --max-time 10 "$URL" > /dev/null; then
+                          echo "Staging responded OK"; exit 0
+                        fi
+                        echo "attempt $i failed, retrying in 15s"; sleep 15
+                      done
+                      echo "Staging did not respond in time"; exit 1
+
+  # ============================================================
+  # Stage 3: Deploy to Production (manual approval gate via environment)
+  # ============================================================
+  - stage: Deploy_Production
+    displayName: 'Deploy → Production'
+    dependsOn: Deploy_Staging
+    condition: succeeded()
+    jobs:
+      - deployment: DeployProd
+        displayName: 'Deploy container to production Web App'
+        environment: 'production'   # approval check is configured on this environment in DevOps UI
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureWebAppContainer@1
+                  displayName: 'Deploy image to App Service (production)'
+                  inputs:
+                    azureSubscription: '$(azureSubscription)'
+                    appName: '$(appNameProd)'
+                    imageName: '$(acrName).azurecr.io/$(imageRepo):$(imageTag)'
+
+                - task: AzureCLI@2
+                  displayName: 'Smoke-check: GET / on production'
+                  inputs:
+                    azureSubscription: '$(azureSubscription)'
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      set -euo pipefail
+                      URL="https://$(appNameProd).azurewebsites.net/"
+                      echo "Probing $URL ..."
+                      for i in 1 2 3 4 5 6; do
+                        if curl -fsS --max-time 10 "$URL" > /dev/null; then
+                          echo "Production responded OK"; exit 0
+                        fi
+                        echo "attempt $i failed, retrying in 15s"; sleep 15
+                      done
+                      echo "Production did not respond in time"; exit 1
