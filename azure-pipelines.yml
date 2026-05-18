@@ -27,7 +27,6 @@ variables:
   # ---- Wired to bootstrap output (suffix 38215, region switzerlandnorth) ----
   acrName: 'acrmrp38215'                    # ACR name only (no .azurecr.io suffix)
   azureSubscription: 'sc-azure-rm'          # AzureRM service connection (Workload Identity Federation)
-  resourceGroup: 'rg-mrp-dev'
   appNameStaging: 'app-mrp-staging-38215'
   appNameProd: 'app-mrp-prod-38215'
   # The ACR push uses az acr login over sc-azure-rm — no separate Docker Registry connection needed.

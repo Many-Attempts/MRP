@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "switzerlandnorth"
+    },
+    "suffix": {
+      "value": "38215"
+    },
+    "pgAdminUser": {
+      "value": "mrpadmin"
+    },
+    "deployerObjectId": {
+      "value": "762edccd-ef7b-4ae4-a749-12120f29df47"
+    },
+    "containerImage": {
+      "value": "mrp:latest"
+    },
+    "bootstrapHostIp": {
+      "value": ""
+    }
+  }
+}
