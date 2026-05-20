@@ -6,13 +6,13 @@
       "value": "switzerlandnorth"
     },
     "suffix": {
-      "value": "38215"
+      "value": "47823"
     },
     "pgAdminUser": {
       "value": "mrpadmin"
     },
     "deployerObjectId": {
-      "value": "762edccd-ef7b-4ae4-a749-12120f29df47"
+      "value": "7598dea2-70ea-4da4-af1b-b189a3f45614"
     },
     "containerImage": {
       "value": "mrp:latest"
